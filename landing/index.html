@@ -254,7 +254,12 @@ tbody tr{transition:background .2s}tbody tr:hover td,tbody tr:hover th{backgroun
 .beli-pop .av{width:40px;height:40px;border-radius:12px;background:var(--grad);color:#fff;display:grid;place-items:center;font-family:var(--judul);font-weight:800;flex:none;animation:goyang 1.4s ease-in-out .5s 2}
 .beli-pop .av .ik{width:20px;height:20px}
 .beli-pop .tutup{position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;border:0;background:var(--ink);color:#fff;font-size:14px;line-height:1;cursor:pointer;display:grid;place-items:center}
-.beli-pop b{display:block;font-size:14px}.beli-pop small{font-size:12px;color:var(--muted)}
+.beli-pop .av{border-radius:50%;width:44px;height:44px;font-size:18px}
+.beli-pop .baris1{display:block;font-size:14px;line-height:1.3}.beli-pop .baris1 b{font-weight:700}
+.beli-pop .baris2{display:block;font-size:13px;color:var(--ink2);line-height:1.3}
+.beli-pop .baris3{display:flex;align-items:center;gap:5px;font-size:12px;color:#1E9E5A;font-weight:600;margin-top:2px}
+.beli-pop .baris3 .ik{width:14px;height:14px}
+.beli-pop .tanda{position:absolute;top:-9px;left:14px;font-size:10px;font-weight:800;letter-spacing:.08em;background:var(--neon);color:var(--ink);padding:2px 8px;border-radius:999px}
 @media (prefers-reduced-motion:reduce){.beli-pop{transition:opacity .2s;transform:none}}
 
 /* faq */
@@ -525,13 +530,13 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
     <div class="kaki-bawah"><span>© 2026 Beresin by <b>FF Agency</b></span><span>Pekanbaru, Indonesia</span></div>
   </div>
 </footer>
-<div class="beli-pop" id="beliPop" role="status" aria-live="polite"><a href="#harga" style="display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit"><div class="av" id="popAv"></div><div><b id="popNama"></b><small id="popWaktu"></small></div></a><button class="tutup" id="popTutup" aria-label="Tutup">×</button></div>
+<div class="beli-pop" id="beliPop" role="status" aria-live="polite"><a href="#harga" style="display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit"><div class="av" id="popAv"></div><div><span class="baris1" id="popNama"></span><span class="baris2">membeli <b>Beresin Lifetime</b></span><span class="baris3"><svg class="ik"><use href="#cek"/></svg><span id="popWaktu"></span></span></div></a><button class="tutup" id="popTutup" aria-label="Tutup">×</button><span class="tanda" id="popTanda" hidden>CONTOH</span></div>
 <script>
 /* ===== ATUR DI SINI =====
    PROMO_SAMPAI: batas harga promo yang BENAR-BENAR berlaku untuk semua orang (WIB).
    Setelah lewat, halaman otomatis menampilkan harga normal Rp 500.000.
    PEMBELI: isi HANYA dengan pembelian asli (nama depan + kota, izin pembeli, waktu beli).
-   Kosong = pop-up hanya menampilkan info promo yang benar. Contoh:
+   Kosong = pop-up tidak muncul. Pratinjau tampilan: buka landing/?contoh=1 (data contoh, ada label CONTOH). Contoh:
    { nama: 'Rina', kota: 'Pekanbaru', waktu: '2026-11-20T14:05:00+07:00' } */
 const PROMO_SAMPAI = '2026-11-30T23:59:59+07:00';
 const PEMBELI = [];
@@ -567,28 +572,29 @@ document.documentElement.classList.add('js');
     target.forEach(el => { const i = [...el.parentElement.children].indexOf(el) % 4; el.style.setProperty('--d', (i * .09) + 's'); el.classList.add('muncul'); io.observe(el); });
   }
 
-  // pop-up: pembelian asli (kalau ada) + info yang benar
-  const asli = PEMBELI.filter(x => x && x.nama && x.waktu && new Date(x.waktu).getTime() <= Date.now()).sort((a, b) => new Date(b.waktu) - new Date(a.waktu)).slice(0, 10);
+  // pop-up "X membeli N menit lalu": dari PEMBELI (asli). ?contoh=1 = pratinjau dengan data contoh berlabel.
+  const demo = new URLSearchParams(location.search).has('contoh');
+  const menitLalu = m => new Date(Date.now() - m * 60000).toISOString();
+  const CONTOH = [['Rina', 'Pekanbaru', 4], ['Dimas', 'Medan', 11], ['Sari', 'Padang', 23], ['Andi', 'Batam', 38], ['Nadia', 'Dumai', 52], ['Yoga', 'Bukittinggi', 75]].map(([nama, kota, m]) => ({ nama, kota, waktu: menitLalu(m) }));
+  const sumber = demo ? CONTOH : PEMBELI;
+  const daftar = sumber.filter(x => x && x.nama && x.waktu && new Date(x.waktu).getTime() <= Date.now()).sort((a, b) => new Date(b.waktu) - new Date(a.waktu)).slice(0, 10);
+  if (!daftar.length) return;
   const lalu = t => { const m = Math.round((Date.now() - new Date(t)) / 60000); return m < 1 ? 'baru saja' : m < 60 ? m + ' menit lalu' : m < 1440 ? Math.round(m / 60) + ' jam lalu' : Math.round(m / 1440) + ' hari lalu'; };
-  const ikon = n => '<svg class="ik"><use href="#' + n + '"/></svg>';
-  const info = () => [
-    Date.now() < akhir && { av: ikon('jam'), judul: 'Promo Rp 100rb tinggal ' + sisaTeks(), sub: 'Setelah itu kembali Rp 500.000' },
-    { av: ikon('cek'), judul: 'Sekali bayar, pakai selamanya', sub: 'Tanpa biaya bulanan atau tahunan' },
-    { av: ikon('link'), judul: 'Bisa dicoba gratis dulu', sub: 'Buka aplikasinya, tanpa daftar' },
-    { av: ikon('wa'), judul: 'Butuh bantuan setup?', sub: 'Tim FF Agency bantu lewat WhatsApp' }
-  ].filter(Boolean);
+  const warna = ['linear-gradient(135deg,#E32B2B,#761A1A)', 'linear-gradient(135deg,#0D0D0D,#4a4a4a)', 'linear-gradient(135deg,#B7791F,#7a4e10)', 'linear-gradient(135deg,#1E9E5A,#0f5c33)'];
+  $('popTanda').hidden = !demo;
   let i = 0, stop = false;
   function tampil() {
     if (stop) return;
-    const daftar = asli.map(x => ({ av: x.nama[0].toUpperCase(), judul: x.nama + (x.kota ? ' dari ' + x.kota : '') + ' membeli Beresin', sub: lalu(x.waktu) })).concat(info());
-    const x = daftar[i++ % daftar.length];
-    $('popAv').innerHTML = x.av; $('popNama').textContent = x.judul; $('popWaktu').textContent = x.sub;
+    const x = daftar[i % daftar.length];
+    $('popAv').textContent = x.nama[0].toUpperCase(); $('popAv').style.background = warna[i % warna.length];
+    $('popNama').innerHTML = '<b></b>' + (x.kota ? ' dari ' : ''); $('popNama').firstChild.textContent = x.nama; if (x.kota) $('popNama').append(x.kota);
+    $('popWaktu').textContent = lalu(x.waktu); i++;
     $('beliPop').classList.add('on');
-    setTimeout(() => $('beliPop').classList.remove('on'), 5500);
-    setTimeout(tampil, 13000);
+    setTimeout(() => $('beliPop').classList.remove('on'), 5000);
+    setTimeout(tampil, demo ? 7000 : 15000);
   }
   $('popTutup').onclick = () => { stop = true; $('beliPop').classList.remove('on'); };
-  setTimeout(tampil, 4000);
+  setTimeout(tampil, demo ? 1500 : 5000);
 })();
 </script>
 </body>
