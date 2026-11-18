@@ -191,6 +191,13 @@ tbody th{font-weight:600;width:30%}
 .kotak-waktu b{display:block;font-family:var(--judul);font-weight:800;font-size:26px;color:var(--neon);font-variant-numeric:tabular-nums;line-height:1.1}
 .kotak-waktu small{font-size:11px;color:#bdbdbd}
 .btn-blok{width:100%}
+.kuota{display:grid;gap:8px;margin:2px 0}
+.kuota-atas{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:600}
+.kuota-atas b{color:var(--merah);font-family:var(--judul);font-weight:800}
+.kuota-bar{height:10px;border-radius:99px;background:rgba(13,13,13,.08);overflow:hidden}
+.kuota-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#E32B2B,#ff7a3d);transition:width 1.2s cubic-bezier(.2,.8,.2,1);background-size:200% 100%;animation:alir-bar 2s linear infinite}
+@keyframes alir-bar{from{background-position:0 0}to{background-position:-200% 0}}
+.kuota small{font-size:12px;color:var(--muted)}
 .satu-kanan{list-style:none;margin:0;padding:0;display:grid;gap:12px;font-size:15px}
 .satu-kanan li{display:flex;gap:10px}.satu-kanan .ik{color:var(--merah);width:18px;height:18px;margin-top:2px}
 @media (max-width:820px){.satu{grid-template-columns:1fr;padding:24px;gap:28px}}
@@ -259,6 +266,10 @@ tbody tr{transition:background .2s}tbody tr:hover td,tbody tr:hover th{backgroun
 .beli-pop .baris2{display:block;font-size:13px;color:var(--ink2);line-height:1.3}
 .beli-pop .baris3{display:flex;align-items:center;gap:5px;font-size:12px;color:#1E9E5A;font-weight:600;margin-top:2px}
 .beli-pop .baris3 .ik{width:14px;height:14px}
+.beli-pop.mendesak{background:rgba(13,13,13,.92);border-color:rgba(255,255,255,.12);color:#fff}
+.beli-pop.mendesak .baris2{color:#cfcfcf}.beli-pop.mendesak .baris3{color:var(--neon)}
+.beli-pop.mendesak .av{background:var(--neon)!important;color:var(--ink)}
+.beli-pop.mendesak .tutup{background:#fff;color:var(--ink)}
 .beli-pop .tanda{position:absolute;top:-9px;left:14px;font-size:10px;font-weight:800;letter-spacing:.08em;background:var(--neon);color:var(--ink);padding:2px 8px;border-radius:999px}
 @media (prefers-reduced-motion:reduce){.beli-pop{transition:opacity .2s;transform:none}}
 
@@ -287,6 +298,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
 @media (max-width:640px){.kaki{grid-template-columns:1fr 1fr}.kaki>div:first-child{grid-column:1/-1}}
 @media (max-width:560px){section{padding:72px 0}.cta{padding:48px 22px}.wrap{padding:0 16px}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media (max-width:340px){.btn{white-space:normal;text-align:center}.wrap{padding:0 12px}.hero h1{font-size:34px}}
 </style>
 </head>
 <body>
@@ -320,6 +332,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
       <svg class="ik api"><use href="#jam"/></svg>
       <span><span class="sembunyi-hp"><b>Promo peluncuran</b> <s>Rp 500rb</s> jadi </span><b>Rp 100rb</b> berakhir</span>
       <span class="waktu" aria-label="Sisa waktu promo"><b id="bH">0</b><b id="bJ">00</b><b id="bM">00</b><b id="bD">00</b></span>
+      <span class="sembunyi-hp" id="barKuota"></span>
       <a class="mini" href="#harga">Ambil</a>
     </div>
   </div>
@@ -467,6 +480,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
         <div class="coret" id="hargaCoret">Rp 500.000</div>
         <div class="harga" id="hargaNow">Rp 100.000</div>
         <p class="hemat" id="hemat">Hemat Rp 400.000 · lisensi seumur hidup</p>
+        <div class="kuota" id="kuota"><div class="kuota-atas"><span>Sisa kuota harga promo</span><b id="kuotaSisa">50 dari 50</b></div><div class="kuota-bar"><i id="kuotaBar"></i></div><small>Setelah kuota habis atau waktu promo lewat, harga kembali Rp 500.000.</small></div>
         <div class="hitung" id="hitung" aria-live="off">
           <p>Harga promo berakhir dalam</p>
           <div class="kotak-waktu"><div><b id="cdH">0</b><small>hari</small></div><div><b id="cdJ">00</b><small>jam</small></div><div><b id="cdM">00</b><small>menit</small></div><div><b id="cdD">00</b><small>detik</small></div></div>
@@ -530,7 +544,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
     <div class="kaki-bawah"><span>© 2026 Beresin by <b>FF Agency</b></span><span>Pekanbaru, Indonesia</span></div>
   </div>
 </footer>
-<div class="beli-pop" id="beliPop" role="status" aria-live="polite"><a href="#harga" style="display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit"><div class="av" id="popAv"></div><div><span class="baris1" id="popNama"></span><span class="baris2">membeli <b>Beresin Lifetime</b></span><span class="baris3"><svg class="ik"><use href="#cek"/></svg><span id="popWaktu"></span></span></div></a><button class="tutup" id="popTutup" aria-label="Tutup">×</button><span class="tanda" id="popTanda" hidden>CONTOH</span></div>
+<div class="beli-pop" id="beliPop" role="status" aria-live="polite"><a href="#harga" style="display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit"><div class="av" id="popAv"></div><div><span class="baris1" id="popNama"></span><span class="baris2" id="popBaris2"></span><span class="baris3"><svg class="ik"><use id="popIkon" href="#cek"/></svg><span id="popWaktu"></span></span></div></a><button class="tutup" id="popTutup" aria-label="Tutup">×</button><span class="tanda" id="popTanda" hidden>CONTOH</span></div>
 <script>
 /* ===== ATUR DI SINI =====
    PROMO_SAMPAI: batas harga promo yang BENAR-BENAR berlaku untuk semua orang (WIB).
@@ -539,14 +553,18 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
    Kosong = pop-up tidak muncul. Pratinjau tampilan: buka landing/?contoh=1 (data contoh, ada label CONTOH). Contoh:
    { nama: 'Rina', kota: 'Pekanbaru', waktu: '2026-11-20T14:05:00+07:00' } */
 const PROMO_SAMPAI = '2026-11-30T23:59:59+07:00';
+const KUOTA_PROMO = 50;   // jumlah lisensi harga promo. Habis = harga otomatis kembali Rp 500.000.
 const PEMBELI = [];
+/* SHEET_CSV (opsional): link CSV Google Sheet berkolom nama | kota | waktu (contoh waktu: 2026-11-20 14:05).
+   Isi Sheet dari HP tiap ada yang transfer → pop-up & sisa kuota ikut berubah tanpa rilis ulang. */
+const SHEET_CSV = '';
 
 document.documentElement.classList.add('js');
 (function () {
   const akhir = new Date(PROMO_SAMPAI).getTime(), $ = id => document.getElementById(id), dua = n => String(n).padStart(2, '0');
   $('tglAkhir').textContent = 'Sampai ' + new Date(akhir).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Jakarta' }) + ' WIB';
   function selesai() {
-    $('barPromo').hidden = true; $('hitung').hidden = true; $('hargaCoret').hidden = true; $('hemat').textContent = 'Lisensi seumur hidup';
+    $('barPromo').hidden = true; $('kuota').hidden = true; $('hitung').hidden = true; $('hargaCoret').hidden = true; $('hemat').textContent = 'Lisensi seumur hidup';
     $('labelPromo').textContent = 'HARGA NORMAL'; $('hargaNow').textContent = 'Rp 500.000';
     document.querySelectorAll('[data-harga]').forEach(el => el.textContent = el.dataset.normal);
   }
@@ -572,29 +590,61 @@ document.documentElement.classList.add('js');
     target.forEach(el => { const i = [...el.parentElement.children].indexOf(el) % 4; el.style.setProperty('--d', (i * .09) + 's'); el.classList.add('muncul'); io.observe(el); });
   }
 
-  // pop-up "X membeli N menit lalu": dari PEMBELI (asli). ?contoh=1 = pratinjau dengan data contoh berlabel.
+  // ===== pembeli asli → kuota + pop-up =====
   const demo = new URLSearchParams(location.search).has('contoh');
   const menitLalu = m => new Date(Date.now() - m * 60000).toISOString();
   const CONTOH = [['Rina', 'Pekanbaru', 4], ['Dimas', 'Medan', 11], ['Sari', 'Padang', 23], ['Andi', 'Batam', 38], ['Nadia', 'Dumai', 52], ['Yoga', 'Bukittinggi', 75]].map(([nama, kota, m]) => ({ nama, kota, waktu: menitLalu(m) }));
-  const sumber = demo ? CONTOH : PEMBELI;
-  const daftar = sumber.filter(x => x && x.nama && x.waktu && new Date(x.waktu).getTime() <= Date.now()).sort((a, b) => new Date(b.waktu) - new Date(a.waktu)).slice(0, 10);
-  if (!daftar.length) return;
+  const waktuDari = t => { t = String(t || '').trim(); if (!t) return ''; if (/^\d{4}-\d{2}-\d{2}[ T]\d{1,2}:\d{2}$/.test(t)) t = t.replace(' ', 'T') + ':00+07:00'; return t; };
+  function bacaCSV(teks) {
+    const baris = teks.trim().split(/\r?\n/).map(l => l.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+    const kepala = baris.shift().map(h => h.toLowerCase());
+    const k = n => kepala.indexOf(n);
+    return baris.map(r => ({ nama: r[k('nama')], kota: r[k('kota')], waktu: waktuDari(r[k('waktu')]) }));
+  }
+  let daftar = [];
+  function siapkan(semua) {
+    daftar = semua.filter(x => x && x.nama && x.waktu && !isNaN(new Date(x.waktu)) && new Date(x.waktu).getTime() <= Date.now()).sort((a, b) => new Date(b.waktu) - new Date(a.waktu));
+    const terjual = demo ? 7 : daftar.length, sisaK = Math.max(0, KUOTA_PROMO - terjual);
+    $('kuotaSisa').textContent = sisaK + ' dari ' + KUOTA_PROMO; $('barKuota').textContent = '· sisa ' + sisaK + ' kuota';
+    requestAnimationFrame(() => $('kuotaBar').style.width = Math.max(4, sisaK / KUOTA_PROMO * 100) + '%');
+    if (sisaK === 0 && !demo) selesai();
+    return sisaK;
+  }
+  let sisaKuota = siapkan(demo ? CONTOH : PEMBELI);
+  if (SHEET_CSV && !demo) fetch(SHEET_CSV, { cache: 'no-store' }).then(r => r.text()).then(t => { sisaKuota = siapkan(PEMBELI.concat(bacaCSV(t))); }).catch(() => {});
+
   const lalu = t => { const m = Math.round((Date.now() - new Date(t)) / 60000); return m < 1 ? 'baru saja' : m < 60 ? m + ' menit lalu' : m < 1440 ? Math.round(m / 60) + ' jam lalu' : Math.round(m / 1440) + ' hari lalu'; };
   const warna = ['linear-gradient(135deg,#E32B2B,#761A1A)', 'linear-gradient(135deg,#0D0D0D,#4a4a4a)', 'linear-gradient(135deg,#B7791F,#7a4e10)', 'linear-gradient(135deg,#1E9E5A,#0f5c33)'];
   $('popTanda').hidden = !demo;
-  let i = 0, stop = false;
+  function isiPop(o) {
+    $('beliPop').classList.toggle('mendesak', !!o.mendesak);
+    $('popAv').innerHTML = o.av; $('popAv').style.background = o.warna || '';
+    $('popNama').innerHTML = o.baris1; $('popBaris2').innerHTML = o.baris2; $('popWaktu').textContent = o.baris3;
+    $('popIkon').setAttribute('href', o.mendesak ? '#jam' : '#cek');
+  }
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const popMendesak = () => Date.now() < akhir && sisaKuota > 0 && {
+    mendesak: true, av: '<svg class="ik" style="width:22px;height:22px"><use href="#jam"/></svg>',
+    baris1: '<b>Harga Rp 100rb tinggal ' + sisaKuota + ' kuota</b>', baris2: 'Normalnya Rp 500.000, hemat Rp 400.000',
+    baris3: 'Promo berakhir ' + sisaTeks() + ' lagi'
+  };
+  let i = 0, n = 0, stop = false;
   function tampil() {
     if (stop) return;
-    const x = daftar[i % daftar.length];
-    $('popAv').textContent = x.nama[0].toUpperCase(); $('popAv').style.background = warna[i % warna.length];
-    $('popNama').innerHTML = '<b></b>' + (x.kota ? ' dari ' : ''); $('popNama').firstChild.textContent = x.nama; if (x.kota) $('popNama').append(x.kota);
-    $('popWaktu').textContent = lalu(x.waktu); i++;
-    $('beliPop').classList.add('on');
-    setTimeout(() => $('beliPop').classList.remove('on'), 5000);
-    setTimeout(tampil, demo ? 7000 : 15000);
+    // urutan: pop-up mendesak dulu, lalu pembeli asli; mendesak muncul lagi tiap 3 pop-up
+    let o = null;
+    if ((n % 3 === 0 || !daftar.length) && popMendesak()) o = popMendesak();
+    else if (daftar.length) {
+      const x = daftar[i % daftar.length]; o = { av: esc(x.nama[0].toUpperCase()), warna: warna[i % warna.length], baris1: '<b>' + esc(x.nama) + '</b>' + (x.kota ? ' dari ' + esc(x.kota) : ''), baris2: 'membeli <b>Beresin Lifetime</b>', baris3: lalu(x.waktu) }; i++;
+    }
+    n++;
+    if (!o) return;
+    isiPop(o); $('beliPop').classList.add('on');
+    setTimeout(() => $('beliPop').classList.remove('on'), 6000);
+    if (daftar.length || n < 3) setTimeout(tampil, demo ? 8000 : 15000);
   }
   $('popTutup').onclick = () => { stop = true; $('beliPop').classList.remove('on'); };
-  setTimeout(tampil, demo ? 1500 : 5000);
+  setTimeout(tampil, demo ? 1500 : 3000);
 })();
 </script>
 </body>
