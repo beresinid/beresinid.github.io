@@ -135,7 +135,7 @@ AKSI.formTim = el => {
   const t = S.tim.find(x => x.id === el?.dataset?.v) || { izin: ['jadwal'] };
   modal(`${kepala(t.id ? 'Ubah anggota' : 'Anggota baru')}<form class="form" id="formTim"><div class="dua"><label class="f"><span>Nama *</span><input name="nama" required value="${esc(t.nama || '')}"></label><label class="f"><span>Peran</span><input name="peran" value="${esc(t.peran || '')}" placeholder="Asisten, editor…"></label></div>
     <label class="f"><span>WhatsApp</span><input name="wa" value="${esc(t.wa || '')}"></label>
-    <div class="f"><span>Izin akses</span>${IZIN.map(([k, l]) => `<label class="cek"><input type="checkbox" name="izin" value="${k}" ${t.izin.includes(k) ? 'checked' : ''}><span style="text-decoration:none;color:inherit">${l}</span></label>`).join('')}<small>Izin dipakai saat login multi-akun (paket Pro). Saat ini semua data ada di perangkat pemilik.</small></div>
+    <div class="f"><span>Izin akses</span>${IZIN.map(([k, l]) => `<label class="cek"><input type="checkbox" name="izin" value="${k}" ${t.izin.includes(k) ? 'checked' : ''}><span style="text-decoration:none;color:inherit">${l}</span></label>`).join('')}<small>Izin dipakai saat login multi-akun (segera hadir). Saat ini semua data ada di perangkat pemilik.</small></div>
     <div class="lembar-kaki">${t.id ? '<button type="button" class="btn btn-hapus" id="hapusTim">Hapus</button>' : ''}<button type="button" class="btn" data-act="tutup">Batal</button><button class="btn btn-merah">Simpan</button></div></form>`, 'kecil');
   if (t.id) $('#hapusTim').onclick = () => { S.tim = S.tim.filter(x => x.id !== t.id); simpan(); tutup(); render(); };
   $('#formTim').onsubmit = e => { e.preventDefault(); const f = e.target, r = { nama: f.nama.value.trim(), peran: f.peran.value.trim(), wa: f.wa.value.trim(), izin: $$('#formTim [name=izin]:checked').map(x => x.value) };
@@ -232,13 +232,28 @@ AKSI.backup = () => { unduh(`backup-beresin-${(S.profil.slug || 'data')}-${hariI
 AKSI.pulih = () => { const inp = $('#filePulih'); inp.onchange = async () => { try { const d = JSON.parse(await inp.files[0].text()); if (!d.versi) throw 0; konfirmasi('Data di perangkat ini akan diganti isi backup.', () => { S = Object.assign(dataAwal(), d); simpan(); ke('beranda'); toast('Data dipulihkan'); }, 'Pulihkan'); } catch (e) { toast('File backup tidak valid'); } inp.value = ''; }; inp.click(); };
 AKSI.resetData = () => konfirmasi('Semua data Beresin di perangkat ini dihapus permanen. Backup dulu kalau perlu.', () => { localStorage.removeItem(KEY); S = dataAwal(); ke('beranda'); });
 
-/* ---------- Langganan & referral ---------- */
+/* ---------- Lisensi (sekali bayar, sama dengan landing page) ---------- */
+const PROMO_SAMPAI = '2026-11-30T23:59:59+07:00';
 VIEWS.langganan = () => {
-  const kodeRef = 'BRS-' + (S.profil.slug || 'saya').slice(0, 8).toUpperCase();
-  return `<div class="judul-hal"><div><h1>Langganan</h1><p>Promo: gratis 1 tahun untuk pendaftar awal.</p></div><span class="chip neon">Paket kamu: Gratis (promo)</span></div>
-  <div class="grid g3 masuk"><div class="paket"><span class="chip neon" style="justify-self:start">PROMO</span><div class="harga">Rp 0</div><small class="muted">Semua fitur inti, 1 tahun</small><ul><li>Dashboard & kalender</li><li>Reminder WA (1 klik)</li><li>E-invoice digital</li><li>Halaman booking publik</li><li>Laporan keuangan & CRM</li><li>Radar okupansi</li></ul></div>
-    <div class="paket"><span class="chip" style="justify-self:start">PRO · TAHUNAN</span><div class="harga">Rp 20rb<small style="font-size:15px">/bln</small></div><small class="muted">Ditagih Rp 240.000/tahun</small><ul><li>Semua fitur promo</li><li>Tanpa watermark</li><li>Manajemen tim & izin</li><li>Sinkron banyak perangkat</li><li>Reminder WA tanpa sentuh</li><li>Support prioritas</li></ul></div>
-    <div class="paket unggul"><span class="chip neon" style="justify-self:start">BULANAN</span><div class="harga">Rp 30rb<small style="font-size:15px">/bln</small></div><small style="color:#aaa">Cancel kapan saja</small><ul><li>Semua fitur Pro</li><li>Tanpa kontrak</li><li>Data tetap aman</li></ul><a class="btn btn-neon" target="_blank" rel="noopener" href="https://wa.me/628159845675?text=${encodeURIComponent('Halo FF Agency, saya mau upgrade Beresin ke Pro (' + S.profil.nama + ')')}">Upgrade via WA</a></div></div>
-  <div class="kartu" style="margin-top:16px"><h3>${ik('gift')} Referral VIP</h3><p>Ajak rekan sesama vendor. Setiap yang daftar & berlangganan pakai kodemu, kamu dapat <b>+30 hari gratis</b>.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><span class="chip hitam" style="font-size:18px;padding:10px 16px">${kodeRef}</span><button class="btn" data-act="salinV" data-v="${kodeRef}">${ik('copy')} Salin kode</button><a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`Aku pakai Beresin buat ngatur jadwal, invoice & reminder WA klien — gratis 1 tahun! Daftar pakai kode ${kodeRef} ya 🙌`)}">${ik('wa')} Ajak teman</a></div></div>`;
+  const akhir = new Date(PROMO_SAMPAI).getTime(), promo = Date.now() < akhir;
+  const sisa = Math.max(0, Math.floor((akhir - Date.now()) / 1000)), h = Math.floor(sisa / 86400), j = Math.floor(sisa / 3600) % 24;
+  const tgl = new Date(akhir).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Jakarta' });
+  const beli = `https://wa.me/628159845675?text=${encodeURIComponent('Halo FF Agency, saya mau beli Beresin (lifetime) untuk ' + (S.profil.nama || 'usaha saya'))}`;
+  return `<div class="judul-hal"><div><h1>Lisensi</h1><p>Sekali bayar, pakai selamanya. Tanpa biaya bulanan.</p></div><span class="chip">Belum beli lisensi</span></div>
+  <div class="grid g2 masuk lisensi">
+    <div class="paket unggul">
+      <span class="chip neon" style="justify-self:start">${promo ? 'HARGA PROMO PELUNCURAN' : 'LISENSI SEUMUR HIDUP'}</span>
+      ${promo ? '<s class="muted" style="font-size:18px;color:#aaa">Rp 500.000</s>' : ''}
+      <div class="harga" style="font-size:40px">${promo ? 'Rp 100.000' : 'Rp 500.000'}</div>
+      <small style="color:#bdbdbd">${promo ? `Hemat Rp 400.000 · promo berakhir ${h ? h + ' hari ' : ''}${j} jam lagi (${tgl} WIB)` : 'Sekali bayar, pakai selamanya'}</small>
+      <a class="btn btn-neon" target="_blank" rel="noopener" href="${beli}">${ik('wa')} Beli lewat WhatsApp</a>
+    </div>
+    <div class="paket"><h3 style="margin:0">Yang kamu dapat</h3><ul>
+      <li>Beranda, kalender & booking tanpa batas</li><li>Link booking publik untuk bio IG</li><li>Invoice digital DP & pelunasan</li>
+      <li>Reminder & tagihan WA sekali ketuk</li><li>Laporan keuangan PDF/CSV & data klien</li><li>Template 17 jenis vendor acara</li>
+      <li>Sewa alat, kursus & sertifikat, tim, ceklist</li><li>Poster pricelist & radar okupansi</li>
+      <li>Update fitur berikutnya tanpa biaya tambahan</li><li>Bantuan setup via WhatsApp</li></ul></div>
+  </div>
+  <div class="kartu" style="margin-top:16px"><h3>${ik('gift')} Ajak teman vendor</h3><p>Kenal vendor lain yang masih nyatat di buku atau chat WA? Kirimkan Beresin ke mereka.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Aku pakai Beresin buat ngatur jadwal, invoice & reminder WA klien. Sekali bayar, pakai selamanya: https://vamosshott18-cloud.github.io/beresin/landing/')}">${ik('wa')} Kirim lewat WA</a><button class="btn" data-act="salinV" data-v="https://vamosshott18-cloud.github.io/beresin/landing/">${ik('copy')} Salin link</button></div></div>`;
 };

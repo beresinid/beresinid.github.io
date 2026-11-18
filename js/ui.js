@@ -9,7 +9,7 @@ const NAV = [
   ['Jualan'],
   ['halaman', 'Halaman Booking', 'globe'], ['layanan', 'Layanan & Harga', 'tag'], ['pricelist', 'Poster Pricelist', 'image'], ['kursus', 'Kursus & Sertifikat', 'award'],
   ['Akun'],
-  ['profesi', 'Jenis Usaha', 'briefcase'], ['tim', 'Tim', 'team'], ['log', 'Log Aktivitas', 'log'], ['setelan', 'Profil & Setelan', 'gear'], ['langganan', 'Langganan & Referral', 'gift'],
+  ['profesi', 'Jenis Usaha', 'briefcase'], ['tim', 'Tim', 'team'], ['log', 'Log Aktivitas', 'log'], ['setelan', 'Profil & Setelan', 'gear'], ['langganan', 'Lisensi', 'gift'],
 ];
 const NAV_BAWAH = [['beranda', 'Beranda', 'home'], ['jadwal', 'Jadwal', 'cal'], null, ['keuangan', 'Uang', 'wallet'], ['lainnya', 'Lainnya', 'grid']];
 
