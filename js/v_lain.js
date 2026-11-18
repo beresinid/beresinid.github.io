@@ -219,7 +219,7 @@ VIEWS.setelan = () => {
      <div class="dua"><label class="f"><span>Gratis jarak (km)</span><input name="s.gratisKm" type="number" min="0" value="${st.gratisKm}"></label><label class="f"><span>Biaya per km</span><input name="s.biayaPerKm" inputmode="numeric" value="${titik(st.biayaPerKm)}"></label></div>
      <p class="muted" style="font-size:13px;margin:0">Contoh: 25 km → ${rp(hitungJalan(25))} otomatis muncul saat mencatat booking.</p></div>
      <div class="sep"></div><h3>${ik('star')} Data</h3><div class="aksi-baris" style="justify-content:flex-start"><button type="button" class="btn" data-act="backup">${ik('in')} Backup (.json)</button><button type="button" class="btn" data-act="pulih">${ik('out')} Pulihkan</button><button type="button" class="btn btn-hapus" data-act="resetData">${ik('trash')} Hapus semua data</button></div>
-     <p class="muted" style="font-size:13px">Semua data tersimpan di perangkat ini. Backup rutin & simpan di Google Drive.</p></div>
+     <p class="muted" style="font-size:13px">${bisaSinkron() ? 'Backup .json tetap bisa dipakai sebagai salinan tambahan.' : 'Semua data tersimpan di perangkat ini. Backup rutin & simpan di Google Drive.'}</p>${kartuSinkron()}</div>
    <div class="kartu" style="grid-column:1/-1"><h3>${ik('wa')} Template pesan WhatsApp</h3><p class="muted" style="margin-top:-6px;font-size:13px">Kata kunci: {nama} {bisnis} {layanan} {tanggal} {jam} {lokasi} {total} {dibayar} {sisa} {link} {kapan} {ig}</p>
      <div class="grid g2">${[['konfirmasi', 'Konfirmasi booking'], ['ingat', 'Pengingat jadwal'], ['tagih', 'Tagih sisa pembayaran'], ['invoice', 'Kirim invoice'], ['terimakasih', 'Terima kasih / minta ulasan']].map(([k, l]) => `<label class="f"><span>${l}</span><textarea name="w.${k}" style="min-height:130px">${esc(st.wa[k] || TEMPLATE_WA[k])}</textarea></label>`).join('')}</div>
      <div class="aksi-baris" style="margin-top:12px"><button class="btn btn-merah">${ik('check')} Simpan setelan</button></div></div>
@@ -238,15 +238,17 @@ VIEWS.langganan = () => {
   const akhir = new Date(PROMO_SAMPAI).getTime(), promo = Date.now() < akhir;
   const sisa = Math.max(0, Math.floor((akhir - Date.now()) / 1000)), h = Math.floor(sisa / 86400), j = Math.floor(sisa / 3600) % 24;
   const tgl = new Date(akhir).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Jakarta' });
-  const beli = `https://wa.me/628159845675?text=${encodeURIComponent('Halo FF Agency, saya mau beli Beresin (lifetime) untuk ' + (S.profil.nama || 'usaha saya'))}`;
-  return `<div class="judul-hal"><div><h1>Lisensi</h1><p>Sekali bayar, pakai selamanya. Tanpa biaya bulanan.</p></div><span class="chip">Belum beli lisensi</span></div>
+  const beli = linkBeli(), L = bacaLisensi();
+  if (L) return `<div class="judul-hal"><div><h1>Lisensi</h1><p>Sekali bayar, pakai selamanya.</p></div><span class="chip lunas">Aktif ✓</span></div>
+  <div class="kartu"><h3>${ik('check')} Beresin aktif di perangkat ini</h3><p>Terdaftar atas <b>${esc(L.email)}</b>. Mau pasang di perangkat lain? Buka Beresin di sana, pilih Aktifkan, lalu pakai email dan kode yang sama.</p></div>`;
+  return `<div class="judul-hal"><div><h1>Lisensi</h1><p>Sekali bayar, pakai selamanya. Tanpa biaya bulanan.</p></div><div class="aksi-baris"><span class="chip">Belum aktif</span>${LISENSI_URL ? `<a class="btn" href="#/aktivasi">${ik('lock')} Sudah beli? Aktifkan</a>` : ''}</div></div>
   <div class="grid g2 masuk lisensi">
     <div class="paket unggul">
       <span class="chip neon" style="justify-self:start">${promo ? 'HARGA PROMO PELUNCURAN' : 'LISENSI SEUMUR HIDUP'}</span>
       ${promo ? '<s class="muted" style="font-size:18px;color:#aaa">Rp 500.000</s>' : ''}
       <div class="harga" style="font-size:40px">${promo ? 'Rp 100.000' : 'Rp 500.000'}</div>
       <small style="color:#bdbdbd">${promo ? `Hemat Rp 400.000 · promo berakhir ${h ? h + ' hari ' : ''}${j} jam lagi (${tgl} WIB)` : 'Sekali bayar, pakai selamanya'}</small>
-      <a class="btn btn-neon" target="_blank" rel="noopener" href="${beli}">${ik('wa')} Beli lewat WhatsApp</a>
+      <a class="btn btn-neon" target="_blank" rel="noopener" href="${beli}">${ik(LINK_BELI ? 'gift' : 'wa')} ${LINK_BELI ? 'Beli sekarang' : 'Beli lewat WhatsApp'}</a>
     </div>
     <div class="paket"><h3 style="margin:0">Yang kamu dapat</h3><ul>
       <li>Beranda, kalender & booking tanpa batas</li><li>Link booking publik untuk bio IG</li><li>Invoice digital DP & pelunasan</li>

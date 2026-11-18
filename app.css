@@ -480,3 +480,8 @@ a.item{text-decoration:none;color:inherit}
 .profesi-kartu em{font-style:normal}
 .chip .ik{width:13px;height:13px}
 .btn:disabled{opacity:.5;cursor:default}
+
+/* mode contoh (belum aktivasi) */
+.pita-contoh{position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:8px 16px;background:var(--ink,#0D0D0D);color:#fff;font-size:14px;text-align:center}
+.pita-contoh .btn{min-height:34px;padding:0 14px;font-size:13px}
+body.publik .pita-contoh{display:none}

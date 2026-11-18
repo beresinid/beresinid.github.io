@@ -495,7 +495,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
           <p class="ket" id="tglAkhir"></p>
         </div>
         <a class="btn btn-merah btn-blok" id="tombolBeli" href="https://wa.me/628159845675?text=Halo%20FF%20Agency%2C%20saya%20mau%20beli%20Beresin%20(lifetime)" target="_blank" rel="noopener"><svg class="ik"><use href="#wa"/></svg> Beli lewat WhatsApp</a>
-        <a class="btn btn-garis gelap btn-blok" href="../">Coba dulu, gratis</a>
+        <a class="btn btn-garis gelap btn-blok" href="../">Lihat contoh aplikasi</a>
       </div>
       <ul class="satu-kanan">
         <li><svg class="ik"><use href="#cek"/></svg>Beranda, kalender &amp; booking tanpa batas</li>
@@ -523,7 +523,8 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
       <details class="kaca"><summary>Bisa dipakai di laptop?</summary><p>Bisa. Di layar lebar, Beresin tampil dengan menu samping dan tata letak yang lebih luas.</p></details>
       <details class="kaca"><summary>Usaha saya tidak ada di daftar, bisa pakai?</summary><p>Bisa. Pilih "Jasa lainnya", lalu ubah layanan, harga, dan ceklist sesuai bisnismu.</p></details>
       <details class="kaca"><summary>Benar-benar sekali bayar?</summary><p>Ya. Satu kali pembayaran untuk lisensi seumur hidup, tanpa biaya bulanan atau tahunan.</p></details>
-      <details class="kaca"><summary>Bagaimana cara beli?</summary><p>Tekan tombol "Beli lewat WhatsApp". Tim FF Agency akan mengirim detail pembayaran dan membantu aktivasi sampai Beresin siap dipakai.</p></details>
+      <details class="kaca"><summary>Bagaimana cara beli dan aktivasi?</summary><p>Tekan tombol Beli dan selesaikan pembayaran. Setelah pembayaran berhasil, kode aktivasi 6 digit dikirim otomatis ke email kamu. Buka aplikasi Beresin, tekan "Aktifkan Beresin", lalu masukkan email dan kode itu.</p></details>
+      <details class="kaca"><summary>Bisa dicoba sebelum beli?</summary><p>Bisa. Tanpa kode aktivasi, aplikasi terbuka dengan data contoh (usaha "Dina Makeup") supaya kamu bisa melihat semua fitur. Data contoh tidak tersimpan; data milikmu sendiri mulai tersimpan setelah aktivasi.</p></details>
     </div>
   </div>
 </section>
@@ -536,7 +537,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
       <img src="../img/beresin_simbol_putih.svg" alt="" style="height:56px">
       <h2>Musim nikah berikutnya,<br>kamu sudah siap.</h2>
       <p>Setup 5 menit. Sekali bayar <span data-harga data-normal="Rp 500.000">Rp 100.000</span>, pakai selamanya.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><a class="btn btn-merah" href="#harga"><span>Beli <span data-harga data-normal="Rp 500rb">Rp 100rb</span> · selamanya</span> <svg class="ik"><use href="#arrow"/></svg></a><a class="btn btn-garis" href="../">Coba dulu, gratis</a></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><a class="btn btn-merah" href="#harga"><span>Beli <span data-harga data-normal="Rp 500rb">Rp 100rb</span> · selamanya</span> <svg class="ik"><use href="#arrow"/></svg></a><a class="btn btn-garis" href="../">Lihat contoh aplikasi</a></div>
     </div>
   </div>
 </section>
@@ -547,7 +548,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
     <div class="kaki">
       <div><img src="../img/beresin_logo_terang.svg" alt="beresin"><p>Aplikasi booking, invoice, dan reminder WhatsApp untuk vendor pernikahan &amp; jasa acara.</p></div>
       <div><h4>Produk</h4><ul><li><a href="#fitur">Fitur</a></li><li><a href="#untuk">Untuk siapa</a></li><li><a href="#harga">Harga</a></li><li><a href="#faq">FAQ</a></li></ul></div>
-      <div><h4>Kontak</h4><ul><li><a href="https://wa.me/628159845675?text=Halo%20FF%20Agency%2C%20saya%20mau%20tanya%20soal%20Beresin" target="_blank" rel="noopener">WhatsApp</a></li><li><a href="../">Coba aplikasinya</a></li></ul></div>
+      <div><h4>Kontak</h4><ul><li><a href="https://wa.me/628159845675?text=Halo%20FF%20Agency%2C%20saya%20mau%20tanya%20soal%20Beresin" target="_blank" rel="noopener">WhatsApp</a></li><li><a href="../">Lihat contoh aplikasi</a></li><li><a href="../#/aktivasi">Aktivasi lisensi</a></li></ul></div>
     </div>
     <div class="kaki-bawah"><span>© 2026 Beresin by <b>FF Agency</b></span><span>Pekanbaru, Indonesia</span></div>
   </div>
@@ -561,6 +562,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
    Kosong = pop-up tidak muncul. Pratinjau tampilan: buka landing/?contoh=1 (data contoh, ada label CONTOH). Contoh:
    { nama: 'Rina', kota: 'Pekanbaru', waktu: '2026-11-20T14:05:00+07:00' } */
 const PROMO_SAMPAI = '2026-11-30T23:59:59+07:00';
+const LINK_BELI = '';    // link produk Beresin di Lynk.id. Kosong = tombol beli ke WhatsApp.
 const KUOTA_PROMO = 50;   // jumlah lisensi harga promo. Habis = harga otomatis kembali Rp 500.000.
 const PEMBELI = [];
 /* SHEET_CSV (opsional): link CSV Google Sheet berkolom nama | kota | waktu (contoh waktu: 2026-11-20 14:05).
@@ -568,6 +570,7 @@ const PEMBELI = [];
 const SHEET_CSV = '';
 
 document.documentElement.classList.add('js');
+if (LINK_BELI) { const t = document.getElementById('tombolBeli'); t.href = LINK_BELI; t.innerHTML = '<svg class="ik"><use href="#arrow"/></svg> Beli sekarang'; }
 (function () {
   const akhir = new Date(PROMO_SAMPAI).getTime(), $ = id => document.getElementById(id), dua = n => String(n).padStart(2, '0');
   $('tglAkhir').textContent = 'Sampai ' + new Date(akhir).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Jakarta' }) + ' WIB';
