@@ -1,5 +1,5 @@
-const V = 'beresin-v25';
-const FILES = ['./', 'index.html', 'app.css', 'manifest.json', 'js/core.js?v=25', 'js/ui.js?v=25', 'js/v_beranda.js?v=25', 'js/v_booking.js?v=25', 'js/v_klien.js?v=25', 'js/v_uang.js?v=25', 'js/v_publik.js?v=25', 'js/v_lain.js?v=25', 'js/lisensi.js?v=25', 'js/sinkron.js?v=25', 'js/app.js?v=25', 'img/icon.svg', 'img/ikon-192.png', 'img/ikon-512.png', 'fonts/OpenSauceOne-ExtraBold.ttf', 'fonts/OpenSauceOne-Bold.ttf', 'fonts/Inter-Regular.ttf', 'fonts/Inter-SemiBold.ttf', 'fonts/Inter-Bold.ttf'];
+const V = 'beresin-v26';
+const FILES = ['./', 'index.html', 'app.css', 'manifest.json', 'js/core.js?v=26', 'js/ui.js?v=26', 'js/v_beranda.js?v=26', 'js/v_booking.js?v=26', 'js/v_klien.js?v=26', 'js/v_uang.js?v=26', 'js/v_publik.js?v=26', 'js/v_lain.js?v=26', 'js/lisensi.js?v=26', 'js/sinkron.js?v=26', 'js/app.js?v=26', 'img/icon.svg', 'img/ikon-192.png', 'img/ikon-512.png', 'fonts/OpenSauceOne-ExtraBold.ttf', 'fonts/OpenSauceOne-Bold.ttf', 'fonts/Inter-Regular.ttf', 'fonts/Inter-SemiBold.ttf', 'fonts/Inter-Bold.ttf'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== V).map(x => caches.delete(x)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
