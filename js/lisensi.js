@@ -1,7 +1,7 @@
 /* Beresin — lisensi: tanpa aktivasi = mode contoh (data contoh, tidak tersimpan).
    LISENSI_URL = URL web app Apps Script (server/Code.gs). Kosong = penguncian mati. */
 const LISENSI_URL = 'https://script.google.com/macros/s/AKfycbxzPGz37Xf1dcpqxdRc7ZN838MBoXbhWwdlJQXICu6UihujN6-RkxypC6f89nV87QmQ/exec';
-const LINK_BELI = '';   // link produk Beresin di Lynk.id; kosong = beli lewat WhatsApp
+const LINK_BELI = 'https://lynk.id/ffagency/oznqk7yjwqoe';   // link produk Beresin di Lynk.id; kosong = beli lewat WhatsApp
 const KEY_LIS = 'beresin_lisensi', KEY_DEV = 'beresin_perangkat';
 
 function idPerangkat() {
