@@ -7,16 +7,17 @@ async function dataPublik() {
   return { v: 1, n: S.profil.nama, pr: S.profil.profesi, w: S.profil.wa, ig: S.profil.ig, kt: S.profil.kota, al: S.profil.alamat, bio: S.profil.bio, hero: S.profil.hero, wr: S.profil.warna, g: (S.profil.galeri || []).slice(0, 3),
     l: S.layanan.filter(l => l.tampil !== false).map(l => [l.id, l.nama, l.harga, l.durasi, l.kategori, l.ket]), s: sibuk, cap: Number(S.setelan.kapasitasHarian) || 1, dp: S.setelan.dpPersen, km: [S.setelan.gratisKm, S.setelan.biayaPerKm], dibuat: h };
 }
-async function linkPublik() { return alamatApp() + '#/p/' + await kode(await dataPublik()); }
+async function linkPublikPanjang() { return alamatApp() + '#/p/' + await kode(await dataPublik()); }
+async function linkPublik() { return (typeof linkPublikPendek === 'function' && await linkPublikPendek()) || linkPublikPanjang(); }
 
 VIEWS.halaman = async () => {
   const link = await linkPublik(), p = S.profil;
   return `<div class="judul-hal"><div><h1>Halaman Booking</h1><p>Landing page + form booking pribadi. Sebar di bio IG, WA, story — klien pilih tanggal kosong & booking sendiri.</p></div>
     <div class="aksi-baris"><a class="btn" href="${esc(link)}" target="_blank" rel="noopener">${ik('globe')} Lihat halaman</a><button class="btn btn-merah" data-act="salinV" data-v="${esc(link)}">${ik('copy')} Salin link</button></div></div>
   <div class="grid g2 masuk" style="align-items:start">
-   <div class="kartu"><h3>${ik('link')} Link kamu</h3><textarea class="inp" readonly style="min-height:90px;font-size:12px" onclick="this.select()">${esc(link)}</textarea>
+   <div class="kartu"><h3>${ik('link')} Link kamu</h3>${link.includes('#/p/') ? `<textarea class="inp" readonly style="min-height:90px;font-size:12px" onclick="this.select()">${esc(link)}</textarea>` : `<input class="inp" readonly style="font-weight:700" value="${esc(link)}" onclick="this.select()">`}
      <div class="aksi-baris" style="justify-content:flex-start;margin-top:10px"><a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Booking jadwal ' + p.nama + ' langsung di sini 👇\n' + link)}">${ik('wa')} Bagikan</a><button class="btn" data-act="bagikanLink">${ik('share')} Bagikan…</button></div>
-     <p class="muted" style="font-size:13px;margin-top:12px">ℹ️ Link ini berisi jadwal penuh <b>per hari ini</b>. Kalau jadwal berubah banyak, salin ulang link supaya tanggal yang penuh ikut ter-update. Booking yang masuk dikirim ke WA kamu, lalu tinggal ketuk link “Masukkan ke Beresin”.</p></div>
+     <p class="muted" style="font-size:13px;margin-top:12px">${link.includes('#/p/') ? 'ℹ️ Link ini berisi jadwal penuh <b>per hari ini</b>. Kalau jadwal berubah banyak, salin ulang link supaya tanggal yang penuh ikut ter-update. Setelah aktivasi lisensi, link berubah jadi pendek & selalu ter-update otomatis.' : 'ℹ️ Link ini tetap sama selamanya dan <b>ter-update otomatis</b> (harga, layanan & tanggal penuh) setiap kali datamu berubah — tidak perlu salin ulang.'} Booking yang masuk dikirim ke WA kamu, lalu tinggal ketuk link “Masukkan ke Beresin”.</p></div>
    <div class="kartu"><h3>${ik('edit')} Tampilan halaman</h3><form class="form" id="formHalaman">
      <label class="f"><span>Judul besar</span><input name="hero" value="${esc(p.hero || '')}" placeholder="Jadwal kosong? Booking langsung di sini."></label>
      <label class="f"><span>Tentang bisnis</span><textarea name="bio" placeholder="Ceritakan keunggulanmu">${esc(p.bio || '')}</textarea></label>
@@ -29,7 +30,7 @@ VIEWS.halaman = async () => {
      <p class="muted" style="font-size:13px">Layanan yang tampil diatur di <a href="#/layanan">Layanan & Harga</a>.</p></div>
   </div>`;
 };
-VIEWS.halaman_siap = () => { const f = $('#formHalaman'); if (!f) return; f.onsubmit = e => { e.preventDefault(); const d = Object.fromEntries(new FormData(f)); S.setelan.kapasitasHarian = Number(d.kapasitasHarian) || 1; delete d.kapasitasHarian; Object.assign(S.profil, d); catat('Ubah halaman booking', 'globe'); simpan(); render(); toast('Tampilan tersimpan — salin ulang link'); }; };
+VIEWS.halaman_siap = () => { const f = $('#formHalaman'); if (!f) return; f.onsubmit = e => { e.preventDefault(); const d = Object.fromEntries(new FormData(f)); S.setelan.kapasitasHarian = Number(d.kapasitasHarian) || 1; delete d.kapasitasHarian; Object.assign(S.profil, d); catat('Ubah halaman booking', 'globe'); simpan(); render(); toast(S.profil.linkSlug ? 'Tampilan tersimpan — link otomatis ter-update' : 'Tampilan tersimpan — salin ulang link'); }; };
 AKSI.pilihWarna = el => { S.profil.warna = el.dataset.v; simpan(); render(); };
 AKSI.hapusGaleri = el => { S.profil.galeri.splice(Number(el.dataset.v), 1); simpan(); render(); };
 AKSI.tambahGaleri = () => { const inp = $('#fileGambar'); inp.onchange = async () => { for (const f of [...inp.files].slice(0, 3 - (S.profil.galeri || []).length)) S.profil.galeri.push(await kecilkan(f, 200)); inp.value = ''; simpan(); render(); }; inp.click(); };
@@ -66,9 +67,10 @@ VIEWS.p_siap = () => { const f = $('#formPub'); if (!f) return; f.onsubmit = asy
   if (!pubPilih.layanan.length) return toast('Pilih layanan dulu'); if (!pubPilih.tanggal) return toast('Pilih tanggal dulu');
   const x = Object.fromEntries(new FormData(f)), d = PUB, lay = pubPilih.layanan.map(id => d.l.find(l => l[0] === id)).filter(Boolean);
   const req = { n: x.nama, w: x.wa, ig: x.ig, t: pubPilih.tanggal, j: x.jam, lk: x.lokasi, c: x.catatan, l: lay.map(l => [l[0], l[1], l[2]]), at: Date.now() };
-  const imp = alamatApp() + '#/impor/' + await kode(req);
+  const kImp = await kode(req);
+  bukaWAJanji(d.w, (async () => { const imp = (await pendekkanImpor(kImp)) || alamatApp() + '#/impor/' + kImp;
   const teks = `Halo ${d.n}, saya mau booking 🙏\n\nNama: ${x.nama}\nWA: ${x.wa}\nLayanan: ${lay.map(l => l[1]).join(', ')}\nTanggal: ${tglPanjang(pubPilih.tanggal)}${x.jam ? ' · ' + x.jam : ''}\nLokasi: ${x.lokasi || '-'}\nCatatan: ${x.catatan || '-'}\nEstimasi: ${rp(lay.reduce((s, l) => s + l[2], 0))}\n\n➡️ Masukkan ke Beresin: ${imp}`;
-  bukaWA(d.w, teks); toast('WhatsApp dibuka — tekan kirim ya'); }; };
+  return teks; })()); toast('WhatsApp dibuka — tekan kirim ya'); }; };
 AKSI.pubLayanan = el => { const i = pubPilih.layanan.indexOf(el.dataset.v); i >= 0 ? pubPilih.layanan.splice(i, 1) : pubPilih.layanan.push(el.dataset.v); simpanIsianPub(); render().then(pulihIsianPub); };
 AKSI.pubTanggal = el => { pubPilih.tanggal = el.dataset.v; simpanIsianPub(); render().then(pulihIsianPub); };
 AKSI.pubBulan = el => { pubPilih.bulan = geserBulan(pubPilih.bulan, Number(el.dataset.v)); simpanIsianPub(); render().then(pulihIsianPub); };

@@ -114,7 +114,11 @@ function prosesWebhook_(isi) {
 }
 
 /* ---------- web app ---------- */
-function doGet() { return json_({ ok: true, layanan: 'Beresin lisensi' }); }
+function doGet(e) {
+  const t = (e && e.parameter && e.parameter.t) || '';
+  if (t) { try { return json_(bacaTautan_(t)); } catch (x) { return json_({ ok: false }); } }
+  return json_({ ok: true, layanan: 'Beresin lisensi' });
+}
 
 function doPost(e) {
   const isi = (e.postData && e.postData.contents) || '';
@@ -136,6 +140,7 @@ function doPost(e) {
     if (m.aksi === 'daftarCadangan') return json_(daftarCadangan_(m));
     if (m.aksi === 'ambilCadangan') return json_(ambilCadangan_(m));
     if (m.aksi === 'kirimRekap') return json_(kirimRekap_(m));
+    if (m.aksi === 'tautan') return json_(tautan_(m));
   } catch (x) { return json_({ ok: false, pesan: 'Server sedang bermasalah, coba lagi.' }); }
   return json_({ ok: false });
 }
@@ -304,4 +309,60 @@ function kirimRekap_(m) {
   });
   c.put(kunci, String(n + 1), 21600);
   return { ok: true, pesan: 'Terkirim ke ' + email + '. Cek juga folder Spam/Promosi.' };
+}
+
+
+/* ================= LINK PENDEK ================= */
+// booking: <app>/<nama-usaha>  ·  invoice: <app>/i/<id>  ·  ceklist: <app>/c/<id>  ·  pesan booking: <app>/m/<id>
+// isi link (data terkode dari aplikasi) disimpan sebagai file teks di Drive: Beresin Data/Beresin Tautan
+const folderTautan_ = () => folder_('FOLDER_TAUTAN', 'Beresin Tautan', folderData_());
+const SLUG_DILARANG = ['i', 'c', 'm', 's', 'p', 'landing', 'js', 'img', 'fonts', 'server', 'index', 'app', 'sw', 'manifest', 'beresin', 'admin', 'api', 'www', 'panduan', 'cs', 'lisensi', 'ffagency'];
+function slugBersih_(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30).replace(/-+$/, ''); }
+function hashPendek_(t) { return Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, t)).replace(/[^A-Za-z0-9]/g, '').slice(0, 7); }
+function fileTautan_(nama) { const it = folderTautan_().getFilesByName(nama + '.txt'); return it.hasNext() ? it.next() : null; }
+function tulisTautan_(nama, isi, timpa) {
+  const c0 = CacheService.getScriptCache(); if (!timpa && c0.get('t_' + nama)) return;
+  const f = fileTautan_(nama);
+  if (f) { if (!timpa) return; f.setContent(isi); } else folderTautan_().createFile(nama + '.txt', isi, MimeType.PLAIN_TEXT);
+  const c = CacheService.getScriptCache(); if (isi.length < 90000) c.put('t_' + nama, isi, 21600); else c.remove('t_' + nama);
+}
+function bacaTautan_(t) {
+  const m = String(t).match(/^(?:([icm])\/)?([A-Za-z0-9-]{1,40})$/); if (!m) return { ok: false };
+  const nama = m[1] ? m[1] + '_' + m[2] : 'p_' + m[2].toLowerCase();
+  const c = CacheService.getScriptCache(), ada = c.get('t_' + nama); if (ada) return { ok: true, d: ada };
+  const f = fileTautan_(nama); if (!f) return { ok: false };
+  const isi = f.getBlob().getDataAsString(); if (isi.length < 90000) c.put('t_' + nama, isi, 21600);
+  return { ok: true, d: isi };
+}
+// cek lisensi dengan cache 10 menit (link invoice dibuat sering, cek Sheet lambat)
+function izinCepat_(m) {
+  const c = CacheService.getScriptCache(), k = 'iz_' + hashPendek_(bersih_(m.email) + '|' + m.perangkat + '|' + m.token);
+  if (c.get(k)) return bersih_(m.email);
+  const email = izin_(m); if (email) c.put(k, '1', 600); return email;
+}
+function tautan_(m) {
+  const tipe = String(m.tipe || ''), d = String(m.d || '');
+  if (!/^[zp][A-Za-z0-9_-]+$/.test(d)) return { ok: false, pesan: 'Isi link tidak valid.' };
+  const P = PropertiesService.getScriptProperties();
+  if (tipe === 'm') {                       // dari halaman booking publik (klien vendor, tanpa lisensi)
+    const slug = slugBersih_(m.slug); if (!slug || !P.getProperty('slug_' + slug) || d.length > 8000) return { ok: false };
+    const c = CacheService.getScriptCache(), k = 'mh_' + slug + '_' + tglWIB_(Date.now()), n = +(c.get(k) || 0);
+    if (n >= 100) return { ok: false }; c.put(k, String(n + 1), 86400);
+    const id = hashPendek_('m|' + d); tulisTautan_('m_' + id, d, false); return { ok: true, id: 'm/' + id };
+  }
+  const email = izinCepat_(m); if (!email) return { ok: false, alasan: 'izin' };
+  if (d.length > 3000000) return { ok: false, pesan: 'Isi link terlalu besar. Kurangi foto galeri.' };
+  const pemilik = namaFile_(email);
+  if (tipe === 'p') {
+    const kunci = LockService.getScriptLock(); kunci.waitLock(15000);
+    try {
+      let dasar = slugBersih_(m.slug) || 'vendor'; if (dasar.length < 3 || SLUG_DILARANG.indexOf(dasar) >= 0) dasar = dasar + '-official';
+      let slug = dasar, n = 2, punya;
+      while ((punya = P.getProperty('slug_' + slug)) && punya !== pemilik) slug = dasar + n++;
+      P.setProperty('slug_' + slug, pemilik); tulisTautan_('p_' + slug, d, true);
+      return { ok: true, id: slug };
+    } finally { kunci.releaseLock(); }
+  }
+  if (tipe === 'i' || tipe === 'c') { const id = hashPendek_(pemilik + '|' + d); tulisTautan_(tipe + '_' + id, d, false); return { ok: true, id: tipe + '/' + id }; }
+  return { ok: false };
 }

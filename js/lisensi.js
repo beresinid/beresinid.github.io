@@ -52,7 +52,8 @@ VIEWS.aktivasi = () => {
     <div class="kartu"><h3>Belum punya kode?</h3><p>Kode dikirim otomatis ke email kamu setelah pembayaran berhasil. Cek juga folder Spam atau Promosi.</p>
       <a class="btn btn-neon" target="_blank" rel="noopener" href="${linkBeli()}">${ik('gift')} Beli Beresin</a>
       <p class="muted" style="font-size:13px;margin-top:12px">Sambil menunggu, kamu bisa menjelajah aplikasi dengan data contoh.</p>
-      <a class="btn" href="landing/panduan/" target="_blank" rel="noopener" style="margin-top:6px">${ik('list')} Panduan lengkap</a></div>
+      <a class="btn" href="landing/panduan/" target="_blank" rel="noopener" style="margin-top:6px">${ik('list')} Panduan lengkap</a>
+      <a class="btn" href="https://wa.me/62895705390702?text=${encodeURIComponent('Halo CS Beresin, saya butuh bantuan aktivasi.')}" target="_blank" rel="noopener" style="margin-top:6px">${ik('wa')} Customer service: 0895-7053-90702</a></div>
   </div>`;
 };
 VIEWS.aktivasi_siap = () => {

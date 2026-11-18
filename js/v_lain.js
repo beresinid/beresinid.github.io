@@ -20,29 +20,6 @@ AKSI.formLayanan = el => {
     if (l.id) Object.assign(S.layanan.find(x => x.id === l.id), r); else S.layanan.push({ ...r, id: uid() }); catat('Layanan: ' + r.nama, 'tag'); simpan(); tutup(); render(); };
 };
 
-/* ---------- Poster pricelist (canvas) ---------- */
-let gayaPoster = 'gelap';
-VIEWS.pricelist = () => `<div class="judul-hal"><div><h1>Poster Pricelist</h1><p>Desain siap posting, langsung dari data layananmu.</p></div><div class="aksi-baris"><div class="tabs">${[['gelap', 'Gelap'], ['terang', 'Terang'], ['merah', 'Merah']].map(([k, l]) => `<button class="${gayaPoster === k ? 'on' : ''}" data-act="gayaPoster" data-v="${k}">${l}</button>`).join('')}</div><button class="btn btn-merah" data-act="unduhPoster">${ik('share')} Bagikan / unduh</button></div></div>
-  <div class="kartu masuk" style="display:flex;justify-content:center"><canvas id="poster" width="1080" height="1350" style="width:min(100%,460px);border-radius:16px;box-shadow:var(--bayang)"></canvas></div>`;
-VIEWS.pricelist_siap = () => gambarPoster($('#poster'));
-AKSI.gayaPoster = el => { gayaPoster = el.dataset.v; render(); };
-AKSI.unduhPoster = () => bagikanGambar($('#poster'), 'pricelist-' + (S.profil.slug || 'beresin') + '.png', 'Pricelist ' + S.profil.nama);
-async function gambarPoster(c) {
-  await muatFontKanvas(); const x = c.getContext('2d'), W = 1080, H = 1350;
-  const tema = { gelap: ['#0D0D0D', '#fff', '#E3EF26', 'rgba(255,255,255,.08)', '#aaa'], terang: ['#F4F4F4', '#0D0D0D', '#E32B2B', '#fff', '#6b6b6b'], merah: ['#B32222', '#fff', '#E3EF26', 'rgba(0,0,0,.18)', '#ffd6d6'] }[gayaPoster];
-  x.fillStyle = tema[0]; x.fillRect(0, 0, W, H);
-  if (gayaPoster !== 'terang') { const g = x.createRadialGradient(W - 120, 120, 10, W - 120, 120, 520); g.addColorStop(0, gayaPoster === 'merah' ? 'rgba(255,120,120,.6)' : 'rgba(227,43,43,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H); }
-  x.fillStyle = 'rgba(227,43,43,1)'; const lbl = 'PRICELIST'; x.font = '800 30px OSO'; const lw = x.measureText(lbl).width + 44; rr(x, 80, 80, lw, 56, 14); x.fillStyle = gayaPoster === 'merah' ? '#0D0D0D' : '#E32B2B'; x.fill(); x.fillStyle = '#fff'; x.fillText(lbl, 102, 119);
-  x.fillStyle = tema[1]; x.font = '800 84px OSO'; tulisMuat(x, S.profil.nama || 'Bisnis Kamu', 80, 250, W - 160, 84);
-  x.font = '600 30px Inter'; x.fillStyle = tema[4]; x.fillText((PROFESI[S.profil.profesi] || PROFESI.lain).nama + (S.profil.kota ? ' · ' + S.profil.kota : ''), 80, 305);
-  const L = S.layanan.filter(l => l.tampil !== false).slice(0, 9); let y = 380; const tinggi = Math.min(96, (1110 - y) / Math.max(1, L.length));
-  L.forEach(l => { x.fillStyle = tema[3]; rr(x, 80, y, W - 160, tinggi - 14, 20); x.fill(); x.fillStyle = tema[1]; x.font = `700 ${Math.min(34, tinggi * .36)}px OSO`; tulisMuat(x, l.nama, 110, y + (tinggi - 14) / 2 + 11, W - 520, Math.min(34, tinggi * .36));
-    x.fillStyle = tema[2]; x.font = `800 ${Math.min(38, tinggi * .4)}px OSO`; x.textAlign = 'right'; x.fillText(rp(l.harga), W - 110, y + (tinggi - 14) / 2 + 13); x.textAlign = 'left'; y += tinggi; });
-  x.fillStyle = tema[4]; x.font = '600 28px Inter'; x.fillText('Booking & tanya jadwal:', 80, 1190); x.fillStyle = tema[1]; x.font = '800 40px OSO'; x.fillText('WA ' + (S.profil.wa || '-') + (S.profil.ig ? '  ·  ' + S.profil.ig : ''), 80, 1245);
-  x.fillStyle = tema[4]; x.font = '600 22px Inter'; x.fillText('Dibuat dengan Beresin', 80, 1300);
-}
-function rr(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
-function tulisMuat(x, t, a, b, maks, ukuran) { let s = ukuran; const font = x.font; while (x.measureText(t).width > maks && s > 16) { s -= 2; x.font = font.replace(/\d+px/, s + 'px'); } x.fillText(t, a, b); }
 
 /* ---------- Radar okupansi ---------- */
 let bulanRadar = hariIni().slice(0, 7);
@@ -253,7 +230,7 @@ VIEWS.langganan = () => {
     <div class="paket"><h3 style="margin:0">Yang kamu dapat</h3><ul>
       <li>Beranda, kalender & booking tanpa batas</li><li>Link booking publik untuk bio IG</li><li>Invoice digital DP & pelunasan</li>
       <li>Reminder & tagihan WA sekali ketuk</li><li>Laporan keuangan PDF/CSV & data klien</li><li>Template 17 jenis vendor acara</li>
-      <li>Sewa alat, kursus & sertifikat, tim, ceklist</li><li>Poster pricelist & radar okupansi</li>
+      <li>Sewa alat, kursus & sertifikat, tim, ceklist</li><li>Poster pricelist, promo & desain sendiri</li>
       <li>Update fitur berikutnya tanpa biaya tambahan</li><li>Bantuan setup via WhatsApp</li></ul></div>
   </div>
   <div class="kartu" style="margin-top:16px"><h3>${ik('gift')} Ajak teman vendor</h3><p>Kenal vendor lain yang masih nyatat di buku atau chat WA? Kirimkan Beresin ke mereka.</p>

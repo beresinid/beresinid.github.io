@@ -7,9 +7,9 @@ const NAV = [
   ['Kerja'],
   ['tagih', 'Waktunya Nagih', 'invoice'], ['reminder', 'Reminder WA', 'wa'], ['radar', 'Radar Okupansi', 'radar'], ['ceklist', 'Ceklist Perlengkapan', 'list'], ['sewa', 'Penyewaan Alat', 'box'],
   ['Jualan'],
-  ['halaman', 'Halaman Booking', 'globe'], ['layanan', 'Layanan & Harga', 'tag'], ['pricelist', 'Poster Pricelist', 'image'], ['kursus', 'Kursus & Sertifikat', 'award'],
+  ['halaman', 'Halaman Booking', 'globe'], ['layanan', 'Layanan & Harga', 'tag'], ['pricelist', 'Poster & Pricelist', 'image'], ['kursus', 'Kursus & Sertifikat', 'award'],
   ['Akun'],
-  ['profesi', 'Jenis Usaha', 'briefcase'], ['tim', 'Tim', 'team'], ['log', 'Log Aktivitas', 'log'], ['setelan', 'Profil & Setelan', 'gear'], ['langganan', 'Lisensi', 'gift'],
+  ['profesi', 'Jenis Usaha', 'briefcase'], ['tim', 'Tim', 'team'], ['log', 'Log Aktivitas', 'log'], ['setelan', 'Profil & Setelan', 'gear'], ['langganan', 'Lisensi', 'gift'], ['cs', 'Customer Service', 'wa'],
 ];
 const NAV_BAWAH = [['beranda', 'Beranda', 'home'], ['jadwal', 'Jadwal', 'cal'], null, ['keuangan', 'Uang', 'wallet'], ['lainnya', 'Lainnya', 'grid']];
 
@@ -30,8 +30,8 @@ function renderNav() {
 
 async function render() {
   rute = bacaRute();
-  const publik = ['p', 'i', 'c', 'impor'].includes(rute.nama);
-  document.body.classList.toggle('publik', (publik && rute.nama !== 'impor') || (!publik && !S.siap));
+  const publik = ['p', 'i', 'c', 'impor', 's'].includes(rute.nama), imporS = rute.nama === 's' && /^m\//.test(rute.param);
+  document.body.classList.toggle('publik', (publik && rute.nama !== 'impor' && !imporS) || (!publik && !S.siap));
   if (!publik && !S.siap) { $('#view').innerHTML = VIEWS.mulai(); VIEWS.mulai_siap(); return; }
   if (!publik) cekOtomatis();
   const v = VIEWS[rute.nama] || VIEWS.beranda;

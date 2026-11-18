@@ -84,7 +84,7 @@ AKSI.pasangCeklist = el => {
   modal(`${kepala('Pilih template ceklist')}${S.ceklist.length ? S.ceklist.map(c => `<div class="item" data-act="pakaiCeklist" data-v="${b.id}|${c.id}"><div class="av">${ik('list')}</div><div class="tengah"><div class="t1">${esc(c.nama)}</div><div class="t2">${c.items.length} barang</div></div></div>`).join('') : kosong('Belum ada template', 'list', '<a class="btn" href="#/ceklist" data-act="tutup">Buat template</a>')}`, 'kecil');
 };
 AKSI.pakaiCeklist = el => { const [bid, cid] = el.dataset.v.split('|'); const b = bookingDari(bid), c = S.ceklist.find(x => x.id === cid); const ada = new Set((b.ceklist || []).map(x => x.nama)); b.ceklist = [...(b.ceklist || []), ...c.items.filter(n => !ada.has(n)).map(nama => ({ nama, ok: false }))]; simpan(); tutup(); render(); };
-AKSI.linkCeklist = async el => { const b = bookingDari(el.dataset.v); const k = await kode({ b: S.profil.nama, k: klienDari(b.klienId).nama, t: b.tanggal, l: namaLayanan(b), c: b.ceklist.map(c => [c.nama, c.ok ? 1 : 0]) }); const url = alamatApp() + '#/c/' + k; modal(`${kepala('Link ceklist untuk klien', 'Klien bisa memantau persiapan perlengkapan (status saat link dibuat).')}<input class="inp" value="${esc(url)}" readonly onclick="this.select()"><div class="lembar-kaki"><button class="btn" data-act="salinV" data-v="${esc(url)}">${ik('copy')} Salin</button><button class="btn btn-wa" data-act="waTeks" data-v="${esc(klienDari(b.klienId).wa)}" data-t="${esc('Halo ' + klienDari(b.klienId).nama + ', ini status persiapan perlengkapan untuk sesi kamu: ' + url)}">${ik('wa')} Kirim WA</button></div>`, 'kecil'); };
+AKSI.linkCeklist = async el => { const b = bookingDari(el.dataset.v); const k = await kode({ b: S.profil.nama, k: klienDari(b.klienId).nama, t: b.tanggal, l: namaLayanan(b), c: b.ceklist.map(c => [c.nama, c.ok ? 1 : 0]) }); const url = (await pendekkan('c', k)) || alamatApp() + '#/c/' + k; modal(`${kepala('Link ceklist untuk klien', 'Klien bisa memantau persiapan perlengkapan (status saat link dibuat).')}<input class="inp" value="${esc(url)}" readonly onclick="this.select()"><div class="lembar-kaki"><button class="btn" data-act="salinV" data-v="${esc(url)}">${ik('copy')} Salin</button><button class="btn btn-wa" data-act="waTeks" data-v="${esc(klienDari(b.klienId).wa)}" data-t="${esc('Halo ' + klienDari(b.klienId).nama + ', ini status persiapan perlengkapan untuk sesi kamu: ' + url)}">${ik('wa')} Kirim WA</button></div>`, 'kecil'); };
 
 function linkGcal(b) {
   const tgl = b.tanggal.replace(/-/g, ''); let dates;
@@ -106,9 +106,10 @@ AKSI.eksporIcs = () => {
 AKSI.waBooking = el => { const [id, jenis] = el.dataset.v.split('|'); const b = bookingDari(id); const k = klienDari(b.klienId);
   const kapan = selisihHari(hariIni(), b.tanggal); bukaWA(k.wa, isiTemplate(jenis, b, { kapan: kapan === 0 ? 'hari ini' : kapan === 1 ? 'besok' : kapan + ' hari lagi' }));
   S.terkirim[jenis + '_' + id + '_' + hariIni()] = 1; catat(`WA ${jenis} ke ${k.nama}`, 'wa'); simpan(); };
-async function linkInvoice(b) { const k = klienDari(b.klienId); return alamatApp() + '#/i/' + await kode({ p: { n: S.profil.nama, w: S.profil.wa, a: S.profil.alamat, r: S.profil.rekening, i: S.profil.ig }, no: noInvoice(b), k: [k.nama, k.wa], t: b.tanggal, j: b.jam, l: b.lokasi, it: (b.item || []).map(i => [i.nama, i.qty || 1, i.harga]), tb: (b.tambahan || []).map(t => [t.nama, t.harga]), bj: biayaJalan(b), km: b.jarakKm || 0, d: b.diskon || 0, by: bayarDari(b.id).map(p => [p.tanggal, p.nominal, p.jenis]), dibuat: hariIni() }); }
-AKSI.waInvoice = async el => { const b = bookingDari(el.dataset.v); const link = await linkInvoice(b); bukaWA(klienDari(b.klienId).wa, isiTemplate('invoice', b, { link })); catat('Kirim invoice ' + noInvoice(b), 'invoice'); simpan(); };
-AKSI.waTagih = async el => { const b = bookingDari(el.dataset.v); const link = await linkInvoice(b); bukaWA(klienDari(b.klienId).wa, isiTemplate('tagih', b, { link })); S.terkirim['tagih_wa_' + b.id + '_' + hariIni()] = 1; catat('Tagih ' + klienDari(b.klienId).nama, 'wallet'); simpan(); render(); };
+async function linkInvoice(b) { const k = await kodeInvoice(b); return (typeof pendekkan === 'function' && await pendekkan('i', k)) || alamatApp() + '#/i/' + k; }
+async function kodeInvoice(b) { const k = klienDari(b.klienId); return await kode({ p: { n: S.profil.nama, w: S.profil.wa, a: S.profil.alamat, r: S.profil.rekening, i: S.profil.ig }, no: noInvoice(b), k: [k.nama, k.wa], t: b.tanggal, j: b.jam, l: b.lokasi, it: (b.item || []).map(i => [i.nama, i.qty || 1, i.harga]), tb: (b.tambahan || []).map(t => [t.nama, t.harga]), bj: biayaJalan(b), km: b.jarakKm || 0, d: b.diskon || 0, by: bayarDari(b.id).map(p => [p.tanggal, p.nominal, p.jenis]), dibuat: hariIni() }); }
+AKSI.waInvoice = async el => { const b = bookingDari(el.dataset.v); bukaWAJanji(klienDari(b.klienId).wa, linkInvoice(b).then(link => isiTemplate('invoice', b, { link }))); catat('Kirim invoice ' + noInvoice(b), 'invoice'); simpan(); };
+AKSI.waTagih = async el => { const b = bookingDari(el.dataset.v); bukaWAJanji(klienDari(b.klienId).wa, linkInvoice(b).then(link => isiTemplate('tagih', b, { link }))); S.terkirim['tagih_wa_' + b.id + '_' + hariIni()] = 1; catat('Tagih ' + klienDari(b.klienId).nama, 'wallet'); simpan(); render(); };
 AKSI.waTeks = el => bukaWA(el.dataset.v, el.dataset.t);
 AKSI.salinV = el => salin(el.dataset.v);
 
@@ -217,7 +218,7 @@ function formBayar(p) {
 }
 
 /* ---------- invoice ---------- */
-AKSI.lihatInvoice = async el => { const b = bookingDari(el.dataset.v); const link = await linkInvoice(b); location.hash = '#/i/' + link.split('#/i/')[1]; };
+AKSI.lihatInvoice = async el => { const b = bookingDari(el.dataset.v); location.hash = '#/i/' + await kodeInvoice(b); };
 VIEWS.i = async kodeStr => {
   let d; try { d = await urai(kodeStr); } catch (e) { return kosong('Link invoice rusak atau tidak lengkap.', 'invoice'); }
   const sub = d.it.reduce((s, [, q, h]) => s + q * h, 0) + d.tb.reduce((s, [, h]) => s + h, 0);
