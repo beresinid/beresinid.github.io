@@ -87,16 +87,27 @@ function ambil_(pasangan, kataKunci, uji) {
   return '';
 }
 
+function orderSudahAda_(order) {
+  const kol = KOLOM.indexOf('order_id') + 1, sh = sheet_('Pembeli'), n = sh.getLastRow();
+  if (n < 2) return false;
+  return sh.getRange(2, kol, n - 1, 1).getValues().some(([v]) => String(v) === String(order));
+}
+
 function prosesWebhook_(isi) {
   let d; try { d = JSON.parse(isi); } catch (e) { return 'bukan JSON'; }
   const p = semuaNilai_(d, '', []);
-  const status = ambil_(p, ['status', 'event']).toLowerCase();
+  const status = ambil_(p, ['status', 'message_action', 'event']).toLowerCase();
   if (/pending|unpaid|expired|fail|cancel|refund|gagal|batal/.test(status)) return 'dilewati: status ' + status;
   const email = ambil_(p, ['customer.email', 'buyer.email', 'email'], v => /@/.test(v)) ||
                 (p.find(([, v]) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v))) || [])[1];
   if (!email) return 'email tidak ditemukan';
+  // hanya produk Beresin (akun Lynk yang sama bisa menjual produk lain)
+  const judul = p.filter(([j]) => /items\.\d+\.(title|name)$/.test(j)).map(([, v]) => String(v));
+  if (judul.length && !judul.some(t => /beresin/i.test(t))) return 'dilewati: produk lain (' + judul.join(', ') + ')';
   const nama = ambil_(p, ['customer.name', 'buyer.name', 'customer_name', 'name']);
-  const order = ambil_(p, ['ref_id', 'order_id', 'invoice', 'transaction', 'id']);
+  const order = ambil_(p, ['refid', 'ref_id', 'order_id', 'invoice', 'transaction', 'message_id']);
+  // Lynk mengirim ulang kalau balasan dianggap gagal (Apps Script selalu 302) → order yang sama tidak diproses dua kali
+  if (order && orderSudahAda_(order)) return 'dobel (sudah diproses): ' + order;
   tambahPembeli(email, nama, order, 'Lynk' + (status ? ' · ' + status : ''));
   return 'ok: ' + bersih_(email);
 }
