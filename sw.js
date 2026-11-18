@@ -1,5 +1,5 @@
-const V = 'beresin-v21';
-const FILES = ['./', 'index.html', 'app.css', 'manifest.json', 'js/core.js?v=21', 'js/ui.js?v=21', 'js/v_beranda.js?v=21', 'js/v_booking.js?v=21', 'js/v_klien.js?v=21', 'js/v_uang.js?v=21', 'js/v_publik.js?v=21', 'js/v_lain.js?v=21', 'js/app.js?v=21', 'img/icon.svg', 'img/ikon-192.png', 'img/ikon-512.png', 'fonts/OpenSauceOne-ExtraBold.ttf', 'fonts/OpenSauceOne-Bold.ttf', 'fonts/Inter-Regular.ttf', 'fonts/Inter-SemiBold.ttf', 'fonts/Inter-Bold.ttf'];
+const V = 'beresin-v22';
+const FILES = ['./', 'index.html', 'app.css', 'manifest.json', 'js/core.js?v=22', 'js/ui.js?v=22', 'js/v_beranda.js?v=22', 'js/v_booking.js?v=22', 'js/v_klien.js?v=22', 'js/v_uang.js?v=22', 'js/v_publik.js?v=22', 'js/v_lain.js?v=22', 'js/app.js?v=22', 'img/icon.svg', 'img/ikon-192.png', 'img/ikon-512.png', 'fonts/OpenSauceOne-ExtraBold.ttf', 'fonts/OpenSauceOne-Bold.ttf', 'fonts/Inter-Regular.ttf', 'fonts/Inter-SemiBold.ttf', 'fonts/Inter-Bold.ttf'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== V).map(x => caches.delete(x)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
