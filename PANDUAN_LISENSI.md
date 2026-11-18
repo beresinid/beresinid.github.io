@@ -84,4 +84,4 @@ Yang kamu dapat:
 
 Sekali bayar, pakai selamanya. Tanpa biaya bulanan. Dibuka dari browser HP atau laptop, tanpa download di Play Store.
 
-**Setelah pembayaran:** kode aktivasi dikirim otomatis ke email kamu. Buka https://vamosshott18-cloud.github.io/beresin/ → tekan **Aktifkan Beresin** → masukkan email & kode. Satu pembelian bisa dipakai di 2 perangkat.
+**Setelah pembayaran:** kode aktivasi dikirim otomatis ke email kamu. Buka https://beresinid.github.io/ → tekan **Aktifkan Beresin** → masukkan email & kode. Satu pembelian bisa dipakai di 2 perangkat.

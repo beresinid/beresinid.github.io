@@ -234,5 +234,5 @@ VIEWS.langganan = () => {
       <li>Update fitur berikutnya tanpa biaya tambahan</li><li>Bantuan setup via WhatsApp</li></ul></div>
   </div>
   <div class="kartu" style="margin-top:16px"><h3>${ik('gift')} Ajak teman vendor</h3><p>Kenal vendor lain yang masih nyatat di buku atau chat WA? Kirimkan Beresin ke mereka.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Aku pakai Beresin buat ngatur jadwal, invoice & reminder WA klien. Sekali bayar, pakai selamanya: https://vamosshott18-cloud.github.io/beresin/landing/')}">${ik('wa')} Kirim lewat WA</a><button class="btn" data-act="salinV" data-v="https://vamosshott18-cloud.github.io/beresin/landing/">${ik('copy')} Salin link</button></div></div>`;
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Aku pakai Beresin buat ngatur jadwal, invoice & reminder WA klien. Sekali bayar, pakai selamanya: https://beresinid.github.io/landing/')}">${ik('wa')} Kirim lewat WA</a><button class="btn" data-act="salinV" data-v="https://beresinid.github.io/landing/">${ik('copy')} Salin link</button></div></div>`;
 };

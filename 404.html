@@ -3,8 +3,8 @@
 <script>
 /* link pendek: /beresin/<nama-usaha>, /beresin/i/<id> → aplikasi #/s/<id> */
 (function () {
-  var p = location.pathname, gh = /\.github\.io$/.test(location.hostname);
-  var dasar = gh ? '/' + p.split('/')[1] + '/' : '/';
+  var p = location.pathname;
+  var dasar = location.hostname === 'vamosshott18-cloud.github.io' ? '/beresin/' : '/';
   var sisa = p.slice(dasar.length).replace(/\/+$/, '');
   if (sisa && /^([icm]\/)?[A-Za-z0-9-]{1,40}$/.test(sisa)) location.replace(dasar + '#/s/' + sisa);
   else location.replace(dasar);

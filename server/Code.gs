@@ -10,7 +10,7 @@
  * Pasang (sekali): lihat PANDUAN_LISENSI.md
  */
 
-const LINK_APP = 'https://vamosshott18-cloud.github.io/beresin/';
+const LINK_APP = 'https://beresinid.github.io/';
 const MAKS_PERANGKAT_DEFAULT = 2;
 const KOLOM = ['email', 'nama', 'order_id', 'waktu', 'kode', 'maks_perangkat', 'perangkat', 'status', 'catatan'];
 
