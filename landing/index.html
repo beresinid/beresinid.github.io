@@ -198,6 +198,11 @@ tbody th{font-weight:600;width:30%}
 .kotak-waktu b{display:block;font-family:var(--judul);font-weight:800;font-size:26px;color:var(--neon);font-variant-numeric:tabular-nums;line-height:1.1}
 .kotak-waktu small{font-size:11px;color:#bdbdbd}
 .btn-blok{width:100%}
+.dua-opsi{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dua-opsi .opsi{display:grid;gap:6px;align-content:start}
+.dua-opsi small{font-size:12.5px;line-height:1.35;color:var(--ink2);text-align:center}
+.link-contoh{justify-self:center;align-self:center;font-size:14px;font-weight:600;color:var(--ink2);text-decoration:underline;text-underline-offset:3px}
+@media (max-width:560px){.dua-opsi{grid-template-columns:1fr}}
 .kuota{display:grid;gap:8px;margin:2px 0}
 .kuota-atas{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:600}
 .kuota-atas b{color:var(--merah);font-family:var(--judul);font-weight:800}
@@ -356,8 +361,8 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
       <h1 style="margin-top:14px">Jadwal beres.<br>Tagihan beres.<br><span>Kamu tinggal kerja.</span></h1>
       <p class="sub">Beresin menggantikan catatan WA, buku jadwal, dan invoice manual. Klien booking sendiri lewat link, DP dan pelunasan tercatat, pengingat WA tinggal kirim.</p>
       <div class="aksi">
-        <a class="btn btn-merah" href="#harga"><span>Beli <span data-harga data-normal="Rp 500rb">Rp 100rb</span> · selamanya</span> <svg class="ik"><use href="#arrow"/></svg></a>
-        <a class="btn btn-garis" href="https://wa.me/628159845675?text=Halo%20FF%20Agency%2C%20saya%20mau%20tanya%20soal%20Beresin" target="_blank" rel="noopener"><svg class="ik"><use href="#wa"/></svg> Tanya via WA</a>
+        <a class="btn btn-merah" data-beli href="https://lynk.id/ffagency/oznqk7yjwqoe" target="_blank" rel="noopener"><span>Pesan langsung · <span data-harga data-normal="Rp 500rb">Rp 100rb</span></span> <svg class="ik"><use href="#arrow"/></svg></a>
+        <a class="btn btn-garis" href="https://wa.me/628159845675?text=Halo%20FF%20Agency%2C%20saya%20mau%20konsultasi%20gratis%20soal%20Beresin" target="_blank" rel="noopener"><svg class="ik"><use href="#wa"/></svg> Konsultasi gratis</a>
       </div>
       <div class="janji">
         <span><svg class="ik"><use href="#cek"/></svg>Sekali bayar, pakai selamanya</span>
@@ -494,8 +499,11 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
           <div class="kotak-waktu"><div><b id="cdH">0</b><small>hari</small></div><div><b id="cdJ">00</b><small>jam</small></div><div><b id="cdM">00</b><small>menit</small></div><div><b id="cdD">00</b><small>detik</small></div></div>
           <p class="ket" id="tglAkhir"></p>
         </div>
-        <a class="btn btn-merah btn-blok" id="tombolBeli" href="https://wa.me/628159845675?text=Halo%20FF%20Agency%2C%20saya%20mau%20beli%20Beresin%20(lifetime)" target="_blank" rel="noopener"><svg class="ik"><use href="#wa"/></svg> Beli lewat WhatsApp</a>
-        <a class="btn btn-garis gelap btn-blok" href="../">Lihat contoh aplikasi</a>
+        <div class="dua-opsi">
+          <div class="opsi"><a class="btn btn-merah btn-blok" id="tombolBeli" data-beli href="https://lynk.id/ffagency/oznqk7yjwqoe" target="_blank" rel="noopener">Pesan langsung <svg class="ik"><use href="#arrow"/></svg></a><small>Bayar di Lynk.id, kode aktivasi langsung masuk email</small></div>
+          <div class="opsi"><a class="btn btn-garis gelap btn-blok" href="https://wa.me/628159845675?text=Halo%20FF%20Agency%2C%20saya%20mau%20konsultasi%20gratis%20soal%20Beresin" target="_blank" rel="noopener"><svg class="ik"><use href="#wa"/></svg> Konsultasi gratis</a><small>Tanya dulu via WhatsApp, gratis tanpa kewajiban beli</small></div>
+        </div>
+        <a class="link-contoh" href="../">Lihat contoh aplikasi dulu →</a>
       </div>
       <ul class="satu-kanan">
         <li><svg class="ik"><use href="#cek"/></svg>Beranda, kalender &amp; booking tanpa batas</li>
@@ -537,7 +545,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:14px}
       <img src="../img/beresin_simbol_putih.svg" alt="" style="height:56px">
       <h2>Musim nikah berikutnya,<br>kamu sudah siap.</h2>
       <p>Setup 5 menit. Sekali bayar <span data-harga data-normal="Rp 500.000">Rp 100.000</span>, pakai selamanya.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><a class="btn btn-merah" href="#harga"><span>Beli <span data-harga data-normal="Rp 500rb">Rp 100rb</span> · selamanya</span> <svg class="ik"><use href="#arrow"/></svg></a><a class="btn btn-garis" href="../">Lihat contoh aplikasi</a></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><a class="btn btn-merah" data-beli href="https://lynk.id/ffagency/oznqk7yjwqoe" target="_blank" rel="noopener"><span>Pesan langsung · <span data-harga data-normal="Rp 500rb">Rp 100rb</span></span> <svg class="ik"><use href="#arrow"/></svg></a><a class="btn btn-garis" href="https://wa.me/628159845675?text=Halo%20FF%20Agency%2C%20saya%20mau%20konsultasi%20gratis%20soal%20Beresin" target="_blank" rel="noopener"><svg class="ik"><use href="#wa"/></svg> Konsultasi gratis</a></div>
     </div>
   </div>
 </section>
@@ -570,7 +578,8 @@ const PEMBELI = [];
 const SHEET_CSV = '';
 
 document.documentElement.classList.add('js');
-if (LINK_BELI) { const t = document.getElementById('tombolBeli'); t.href = LINK_BELI; t.innerHTML = '<svg class="ik"><use href="#arrow"/></svg> Beli sekarang'; }
+if (LINK_BELI) document.querySelectorAll('[data-beli]').forEach(a => { a.href = LINK_BELI; });
+else document.querySelectorAll('[data-beli]').forEach(a => { a.href = 'https://wa.me/628159845675?text=Halo%20FF%20Agency%2C%20saya%20mau%20beli%20Beresin%20(lifetime)'; });
 (function () {
   const akhir = new Date(PROMO_SAMPAI).getTime(), $ = id => document.getElementById(id), dua = n => String(n).padStart(2, '0');
   $('tglAkhir').textContent = 'Sampai ' + new Date(akhir).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Jakarta' }) + ' WIB';
