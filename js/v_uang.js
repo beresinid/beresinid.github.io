@@ -22,7 +22,7 @@ VIEWS.keuangan = () => {
     keluar: `<div class="kartu" style="margin-top:16px"><div class="aksi-baris" style="margin-bottom:6px"><button class="btn btn-kecil btn-merah" data-act="formKeluar">${ik('plus')} Pengeluaran</button></div>${keluar.length ? keluar.map(k => `<div class="item" data-act="formKeluar" data-v="${k.id}"><div class="av">${ik('out')}</div><div class="tengah"><div class="t1">${esc(k.nama)}</div><div class="t2">${tglSedang(k.tanggal)} · ${esc(k.kategori)}</div></div><div class="kanan"><b>−${rp(k.nominal)}</b></div></div>`).join('') : kosong('Belum ada pengeluaran', 'out')}</div>`,
   };
   return `<div class="judul-hal"><div><h1>Keuangan</h1><p>Pemasukan & pengeluaran terhitung otomatis dari booking.</p></div>
-    <div class="aksi-baris"><button class="btn" data-act="laporanPdf">${ik('print')} Laporan PDF</button><button class="btn" data-act="eksporCsv">${ik('in')} CSV</button><button class="btn btn-merah" data-act="formKeluar">${ik('plus')} Pengeluaran</button></div></div>
+    <div class="aksi-baris"><button class="btn" data-act="laporanPdf">${ik('print')} Laporan PDF</button><button class="btn" data-act="eksporCsv">${ik('in')} CSV</button><button class="btn" data-act="kirimRekap">${ik('mail')} Kirim ke email</button><button class="btn btn-merah" data-act="formKeluar">${ik('plus')} Pengeluaran</button></div></div>
   <div class="kal-kepala"><button class="ikon-btn" data-act="bulanUang" data-v="-1">${ik('back')}</button><h3>${namaBulan(ym)}</h3><button class="ikon-btn" data-act="bulanUang" data-v="1">${ik('arrow')}</button></div>
   <div class="hero masuk"><div class="gumpal" style="width:300px;height:300px;background:#E32B2B;right:-80px;top:-140px;opacity:.5"></div>
     <div class="statgrid" style="margin-top:0"><div class="stat"><div class="l">Pemasukan</div><div class="v neon tnum">${rpPendek(tm)}</div><div class="s">${persen(tm, tmL)} vs bulan lalu</div></div>
@@ -46,16 +46,42 @@ AKSI.formKeluar = el => {
   $('#formKeluar').onsubmit = e => { e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); const r = { ...k, ...d, nominal: angka(d.nominal), kategori: kat, id: k.id || uid() };
     if (k.id) Object.assign(S.keluar.find(x => x.id === k.id), r); else S.keluar.push(r); catat(`Pengeluaran ${r.nama} ${rp(r.nominal)}`, 'out'); simpan(); tutup(); render(); toast('Pengeluaran tersimpan'); };
 };
-AKSI.eksporCsv = () => {
-  const ym = bulanUang, dari = awalBulan(ym), sampai = akhirBulan(ym), q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
-  const rows = [['Tanggal', 'Jenis', 'Keterangan', 'Kategori', 'Masuk', 'Keluar'], ...uangMasuk(dari, sampai).map(m => [m.tanggal, 'Masuk', m.nama, m.sumber, m.nominal, '']), ...uangKeluar(dari, sampai).map(k => [k.tanggal, 'Keluar', k.nama, k.kategori, '', k.nominal])].sort((a, b) => String(a[0]).localeCompare(b[0]));
-  unduh(`keuangan-${ym}.csv`, '﻿' + rows.map(r => r.map(q).join(';')).join('\n'), 'text/csv'); toast('CSV diunduh — bisa dibuka di Excel / Google Sheets');
-};
+const qCsv = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+function csvKeuangan(ym) {
+  const dari = awalBulan(ym), sampai = akhirBulan(ym);
+  const rows = [['Tanggal', 'Jenis', 'Keterangan', 'Kategori', 'Masuk', 'Keluar'], ...[...uangMasuk(dari, sampai).map(m => [m.tanggal, 'Masuk', m.nama, m.sumber, m.nominal, '']), ...uangKeluar(dari, sampai).map(k => [k.tanggal, 'Keluar', k.nama, k.kategori, '', k.nominal])].sort((a, b) => String(a[0]).localeCompare(b[0]))];
+  return rows.map(r => r.map(qCsv).join(';')).join('\n');
+}
+function csvKlien() {
+  const rows = [['Nama', 'WhatsApp', 'Instagram', 'Alamat', 'Catatan', 'Jumlah booking', 'Total belanja', 'Sisa tagihan']];
+  S.klien.forEach(k => { const bk = S.booking.filter(b => b.klienId === k.id && aktif(b)); rows.push([k.nama, k.wa, k.ig, k.alamat, k.catatan, bk.length, bk.reduce((s, b) => s + totalBooking(b), 0), bk.reduce((s, b) => s + sisaBayar(b), 0)]); });
+  return rows.map(r => r.map(qCsv).join(';')).join('\n');
+}
+AKSI.eksporCsv = () => { unduh(`keuangan-${bulanUang}.csv`, '﻿' + csvKeuangan(bulanUang), 'text/csv'); toast('CSV diunduh — bisa dibuka di Excel / Google Sheets'); };
+
+/* rekap bulanan dalam HTML sederhana (gaya inline) — untuk badan email & PDF yang dibuat server */
+function htmlRekap(ym) {
+  const dari = awalBulan(ym), sampai = akhirBulan(ym), masuk = uangMasuk(dari, sampai), keluar = uangKeluar(dari, sampai), tm = jumlah(masuk), tk = jumlah(keluar);
+  const bk = S.booking.filter(b => aktif(b) && b.tanggal.startsWith(ym)), belum = S.booking.filter(b => aktif(b) && statusBayar(b) !== 'lunas' && sisaBayar(b) > 0).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+  const td = 'padding:7px 8px;border-bottom:1px solid #eee;font-size:13px', th = td + ';text-align:left;color:#777;font-weight:600', kn = ';text-align:right;white-space:nowrap';
+  const tabel = (judul, kolom, baris, total) => `<h3 style="font-size:15px;margin:22px 0 6px">${judul}</h3><table style="width:100%;border-collapse:collapse"><tr>${kolom.map((k, i) => `<th style="${th}${i === kolom.length - 1 ? kn : ''}">${k}</th>`).join('')}</tr>${baris.length ? baris.map(r => `<tr>${r.map((v, i) => `<td style="${td}${i === r.length - 1 ? kn : ''}">${v}</td>`).join('')}</tr>`).join('') : `<tr><td style="${td};color:#999" colspan="${kolom.length}">Tidak ada</td></tr>`}${total ? `<tr><td style="${td}" colspan="${kolom.length - 1}"><b>${total[0]}</b></td><td style="${td}${kn}"><b>${total[1]}</b></td></tr>` : ''}</table>`;
+  const kotak = (l, v, w) => `<td style="padding:10px 12px;border:1px solid #eee;width:25%"><div style="font-size:11px;color:#777">${l}</div><div style="font-size:17px;font-weight:800;color:${w || '#0D0D0D'}">${rp(v)}</div></td>`;
+  return `<div style="font-family:Arial,Helvetica,sans-serif;color:#0D0D0D;max-width:720px;margin:auto">
+    <div style="border-bottom:3px solid #E32B2B;padding-bottom:10px"><div style="font-size:22px;font-weight:800">Rekap ${esc(namaBulan(ym))}</div><div style="color:#777;font-size:13px;margin-top:4px">${esc(S.profil.nama || 'Bisnis kamu')} · dibuat ${esc(tglPanjang(hariIni()))}</div></div>
+    <table style="width:100%;border-collapse:separate;border-spacing:6px;margin-top:14px"><tr>${kotak('Pemasukan', tm, '#1a8f4a')}${kotak('Pengeluaran', tk)}${kotak('Laba bersih', tm - tk, tm - tk < 0 ? '#E32B2B' : '')}${kotak('Piutang', piutangSemua())}</tr></table>
+    <p style="font-size:14px;margin:12px 0">${bk.length} booking terjadwal bulan ini, ${bk.filter(b => statusBayar(b) === 'lunas').length} sudah lunas. ${tm >= tk ? 'Bulan ini untung ' + rp(tm - tk) + '.' : 'Bulan ini rugi ' + rp(tk - tm) + '.'}</p>
+    ${tabel('Pemasukan', ['Tanggal', 'Keterangan', 'Jumlah'], masuk.map(m => [tglPendek(m.tanggal), esc(m.nama), rp(m.nominal)]), ['Total pemasukan', rp(tm)])}
+    ${tabel('Pengeluaran', ['Tanggal', 'Keterangan', 'Jumlah'], keluar.map(k => [tglPendek(k.tanggal), esc(k.nama) + ' <span style="color:#999">· ' + esc(k.kategori) + '</span>', rp(k.nominal)]), ['Total pengeluaran', rp(tk)])}
+    ${tabel('Booking bulan ini', ['Tanggal', 'Klien', 'Layanan', 'Status'], bk.map(b => [tglPendek(b.tanggal), esc(klienDari(b.klienId).nama), esc(namaLayanan(b)), statusBayar(b) === 'lunas' ? 'Lunas' : 'Sisa ' + rp(sisaBayar(b))]))}
+    ${tabel('Belum lunas (semua jadwal)', ['Tanggal', 'Klien', 'Sisa'], belum.map(b => [tglPendek(b.tanggal), esc(klienDari(b.klienId).nama), rp(sisaBayar(b))]), belum.length ? ['Total piutang', rp(piutangSemua())] : null)}
+  </div>`;
+}
+
 AKSI.laporanPdf = () => { location.hash = '#/laporan/' + bulanUang; };
 VIEWS.laporan = ym => {
   ym = ym || bulanUang; const dari = awalBulan(ym), sampai = akhirBulan(ym), masuk = uangMasuk(dari, sampai), keluar = uangKeluar(dari, sampai), tm = jumlah(masuk), tk = jumlah(keluar);
   const bk = S.booking.filter(b => aktif(b) && b.tanggal.startsWith(ym));
-  return `<div class="no-print aksi-baris" style="justify-content:space-between;margin:14px 0"><a class="btn" href="#/keuangan">${ik('back')} Keuangan</a><button class="btn btn-merah" onclick="print()">${ik('print')} Simpan PDF</button></div>
+  return `<div class="no-print aksi-baris" style="justify-content:space-between;margin:14px 0"><a class="btn" href="#/keuangan">${ik('back')} Keuangan</a><div class="aksi-baris"><button class="btn" data-act="rekapXlsx">${ik('in')} Excel detail</button><button class="btn" data-act="rekapPdf">${ik('print')} PDF detail</button><button class="btn" data-act="kirimRekap">${ik('mail')} Kirim ke email saya</button><button class="btn btn-merah" onclick="print()">${ik('print')} Cetak</button></div></div>
   <div class="invoice" style="max-width:860px"><div class="kepala"><div><h1>Laporan Keuangan</h1><p class="muted" style="margin:6px 0 0">${esc(S.profil.nama)} · ${namaBulan(ym)}</p></div><img src="img/beresin_logo_terang.svg" alt="beresin" style="height:28px"></div>
   <div class="grid g4" style="margin-top:18px">${[['Pemasukan', tm], ['Pengeluaran', tk], ['Laba bersih', tm - tk], ['Piutang', piutangSemua()]].map(([l, v]) => `<div style="border:1px solid var(--garis);border-radius:14px;padding:12px"><small class="muted">${l}</small><div style="font-family:var(--judul);font-weight:800;font-size:20px">${rp(v)}</div></div>`).join('')}</div>
   <p style="margin-top:16px">${bk.length} booking terjadwal bulan ini, ${bk.filter(b => statusBayar(b) === 'lunas').length} sudah lunas. ${tm >= tk ? 'Bulan ini untung ' + rp(tm - tk) + '.' : 'Bulan ini rugi ' + rp(tk - tm) + '.'}</p>

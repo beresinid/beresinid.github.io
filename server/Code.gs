@@ -134,6 +134,7 @@ function doPost(e) {
     if (m.aksi === 'simpanData') return json_(simpanData_(m));
     if (m.aksi === 'daftarCadangan') return json_(daftarCadangan_(m));
     if (m.aksi === 'ambilCadangan') return json_(ambilCadangan_(m));
+    if (m.aksi === 'kirimRekap') return json_(kirimRekap_(m));
   } catch (x) { return json_({ ok: false, pesan: 'Server sedang bermasalah, coba lagi.' }); }
   return json_({ ok: false });
 }
@@ -277,4 +278,29 @@ function ambilCadangan_(m) {
   const it = folderCadangan_().getFilesByName(namaFile_(email) + '_' + tgl + '.json');
   if (!it.hasNext()) return { ok: false, pesan: 'Cadangan tidak ditemukan.' };
   const isi = bacaFile_(it.next()); return isi ? { ok: true, data: isi.data, waktu: isi.waktu } : { ok: false, pesan: 'Cadangan rusak.' };
+}
+
+/* ---------- kirim rekap ke email pembeli (tombol "Kirim ke email saya") ----------
+ * Hanya ke email lisensi itu sendiri (dicek lewat token perangkat), maks 10x per hari per email.
+ * Lampiran dikirim dari aplikasi: PDF detail, Excel, cadangan .json. */
+function kirimRekap_(m) {
+  if (!cek_(m).ok) return { ok: false, pesan: 'Perangkat ini belum aktif. Aktifkan Beresin dulu.' };
+  const email = bersih_(m.email), c = CacheService.getScriptCache(), kunci = 'rekap_' + email + '_' + tglWIB_(Date.now()), n = +(c.get(kunci) || 0);
+  if (n >= 10) return { ok: false, pesan: 'Batas 10 kiriman per hari tercapai. Coba lagi besok.' };
+  if (MailApp.getRemainingDailyQuota() < 15) return { ok: false, pesan: 'Server email sedang penuh hari ini. Coba lagi besok, atau unduh PDF/Excel langsung di halaman Laporan.' };
+  const bulan = String(m.bulan || '').replace(/[^0-9-]/g, '').slice(0, 7), judul = String(m.judul || 'Rekap Beresin').slice(0, 120);
+  const html = String(m.html || '').slice(0, 400000), lamp = [];
+  // lampiran dibuat di aplikasi (PDF detail, Excel, cadangan .json); total dibatasi ±18 MB
+  let total = 0;
+  (Array.isArray(m.lampiran) ? m.lampiran : []).slice(0, 5).forEach(l => {
+    const b64 = String(l.b64 || ''); total += b64.length; if (!b64 || total > 24e6) return;
+    const nama = String(l.nama || 'lampiran').replace(/[^\w.\-]+/g, '_').slice(0, 100), tipe = /^(application|text)\/[\w.+-]+$/.test(l.tipe) ? l.tipe : 'application/octet-stream';
+    lamp.push(Utilities.newBlob(Utilities.base64Decode(b64), tipe, nama));
+  });
+  MailApp.sendEmail({
+    to: email, name: 'Beresin', subject: judul, attachments: lamp,
+    htmlBody: html + '<p style="font-family:Arial,sans-serif;font-size:12px;color:#777;margin-top:24px">Lampiran: laporan PDF detail, Excel (bisa difilter per klien/layanan/status) dan file cadangan .json (bisa dipulihkan di Beresin &rarr; Setelan &rarr; Pulihkan).<br>Dikirim dari Beresin &middot; by FF Agency</p>',
+  });
+  c.put(kunci, String(n + 1), 21600);
+  return { ok: true, pesan: 'Terkirim ke ' + email + '. Cek juga folder Spam/Promosi.' };
 }
