@@ -72,6 +72,7 @@ function kirimKode_(r) {
     <li>Tekan <b>Aktifkan Beresin</b></li>
     <li>Masukkan email ini (<b>${r.email}</b>) dan kode di atas</li></ol>
     <p>Satu pembelian bisa dipakai di <b>${r.maks_perangkat || MAKS_PERANGKAT_DEFAULT} perangkat</b>. Simpan email ini ya.</p>
+    <p><a href="${LINK_APP}landing/panduan/" style="display:inline-block;background:#0D0D0D;color:#fff;text-decoration:none;font-weight:700;padding:10px 16px;border-radius:10px">Baca panduan lengkap</a><br><span style="font-size:13px;color:#5E5E5E">Pasang di HP, setup awal, link booking, pakai di 2 perangkat, dan rekap bulanan.</span></p>
     <p style="color:#5E5E5E;font-size:13px">Butuh bantuan? Balas email ini atau chat WhatsApp FF Agency.</p></div>`;
   MailApp.sendEmail({ to: r.email, subject: 'Kode aktivasi Beresin kamu: ' + r.kode, htmlBody: html, name: 'Beresin by FF Agency' });
 }
